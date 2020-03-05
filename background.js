@@ -7,7 +7,7 @@ chrome.runtime.onInstalled.addListener(function () {
   chrome.declarativeContent.onPageChanged.removeRules(undefined, function () {
     chrome.declarativeContent.onPageChanged.addRules([{
       conditions: [new chrome.declarativeContent.PageStateMatcher({
-        pageUrl: { urlMatches: '.*?hana\.ondemand\.com\/itspaces\/shell\/.*?integrationflows\/.*?' },
+        pageUrl: { urlMatches: '.*?hana\.ondemand\.com\/itspaces\/.*?' },
       })],
       actions: [new chrome.declarativeContent.ShowPageAction()]
     }]);

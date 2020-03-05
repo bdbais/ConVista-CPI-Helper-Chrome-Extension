@@ -83,55 +83,66 @@ function getLogs() {
 
       updatedText.textContent = "Last update: " + new Date().toLocaleString("de-DE");
 
-      let thisMessageHash = resp[0].MessageGuid + resp[0].LogStart + resp[0].LogEnd + resp[0].Status;
-      if (thisMessageHash != cpiData.lastMessageHashList[0]) {
-        console.log("Updating message list");
-        let thisMessageHashList = [];
+      let thisMessageHash = "";
+      if (resp.length != 0) {
+        thisMessageHash = resp[0].MessageGuid + resp[0].LogStart + resp[0].LogEnd + resp[0].Status;
 
-        let messageList = document.getElementById('messageList');
-        messageList.innerHTML = "";
+        if (thisMessageHash != cpiData.lastMessageHashList[0]) {
 
-        for (var i = 0; i < resp.length; i++) {
-          thisMessageHashList.push(resp[i].MessageGuid + resp[i].LogStart + resp[i].LogEnd + resp[i].Status);
-          let listItem = document.createElement("li");
+          let thisMessageHashList = [];
 
-          let traceButton = "";
-          if (resp[i].LogLevel == "TRACE") {
-            traceButton = "<button id='trace--" + i + "' class='" + resp[i].MessageGuid + "'>Trace</button>";
-          }
+          let messageList = document.getElementById('messageList');
+          messageList.innerHTML = "";
+          var lastDay;
 
-          let statusColor = "#008000";
-          if (resp[i].Status == "PROCESSING") {
-            statusColor = "#FFC300";
-          }
-          if (resp[i].Status == "FAILED") {
-            statusColor = "#C70039";
-          }
-          listItem.style["color"] = statusColor;
+          for (var i = 0; i < resp.length; i++) {
+            thisMessageHashList.push(resp[i].MessageGuid + resp[i].LogStart + resp[i].LogEnd + resp[i].Status);
 
-          //flash animation for new elements
-          let flash = "";
-          if (cpiData.lastMessageHashList.length != 0 && !cpiData.lastMessageHashList.includes(thisMessageHashList[i])) {
-            flash = "class='flash'";
-          }
+            //write date if necessary
+            let date = new Date(parseInt(resp[i].LogEnd.match(/\d+/)[0])).toISOString();
+            if (date.substr(0, 10) != lastDay) {
+              let dateItem = document.createElement("span");
+              dateItem.innerText = date.substr(0, 10);
+              messageList.appendChild(dateItem)
+              lastDay = date.substr(0, 10);
+            }
 
-          listItem.innerHTML = "<span style='color:" + statusColor + "' " + flash + "'> " + new Date(parseInt(resp[i].LogEnd.match(/\d+/)[0])).toLocaleString("de-DE") + "</span> <button id='info--" + i + "' class='" + resp[i].AlternateWebLink + "'>Info</button>" + traceButton;
-          messageList.appendChild(listItem)
+            //flash animation for new elements
+            let flash = "";
+            if (cpiData.lastMessageHashList.length != 0 && !cpiData.lastMessageHashList.includes(thisMessageHashList[i])) {
+              flash = "class='flash'";
+            }
 
-          document.getElementById("info--" + i).addEventListener("click", (a) => {
-            openInfo(a.srcElement.className);
-          });
+            let traceButton = "<button id='trace--" + i + "' class='" + resp[i].MessageGuid + "'>" + resp[i].LogLevel + "</button>";
+            let infoButton = "<button id='info--" + i + "' class='" + resp[i].AlternateWebLink + "'>Log</button>"
 
-          if (resp[i].LogLevel == "TRACE") {
+            let listItem = document.createElement("li");
+            let statusColor = "#008000";
+            if (resp[i].Status == "PROCESSING") {
+              statusColor = "#FFC300";
+            }
+            if (resp[i].Status == "FAILED") {
+              statusColor = "#C70039";
+            }
+            listItem.style["color"] = statusColor;
+            listItem.innerHTML = "<button style='background: white; font-size:1rem;' onMouseOver=\"this.style.backgroundColor='#F8F8F8';\" onMouseOut=\"this.style.backgroundColor='#FFFFFF'\"><span style='color:" + statusColor + "' " + flash + "'> " + date.substr(11, 8) + "</span> </button>" + infoButton + traceButton;
+
+            messageList.appendChild(listItem)
+
+            document.getElementById("info--" + i).addEventListener("click", (a) => {
+              openInfo(a.srcElement.className);
+            });
+
+
             document.getElementById("trace--" + i).addEventListener("click", (a) => {
 
               openTrace(a.srcElement.className);
 
             });
-          }
-        }
-        cpiData.lastMessageHashList = thisMessageHashList;
 
+          }
+          cpiData.lastMessageHashList = thisMessageHashList;
+        }
 
       }
       //new update in 3 seconds
@@ -183,7 +194,6 @@ function waitForElementToDisplay(selector, time) {
       tracebutton.addEventListener("click", (btn) => {
         setLogLevel("TRACE", cpiData.integrationFlowId);
       })
-      console.log(element);
 
       //Create Toggle Message Bar Button
       var messagebutton = createElementFromHTML(' <button id="__buttonxy" data-sap-ui="__buttonxy" title="Messages" class="sapMBtn sapMBtnBase spcHeaderActionButton" style="display: inline-block;"><span id="__buttonxy-inner" class="sapMBtnHoverable sapMBtnInner sapMBtnText sapMBtnTransparent sapMFocusable"><span class="sapMBtnContent" id="__button13-content"><bdi id="__button13-BDI-content">Messages</bdi></span></span></button>');
