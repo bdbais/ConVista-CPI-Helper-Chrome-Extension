@@ -1,6 +1,6 @@
 {
   "name": "ConVista SAP CPI Helper",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Extends the SAP Cloud Platform Integration with some useful features to improve usability.",
   "author": "Dominic Beckbauer @ Convista Consulting AG",
   "homepage_url": "https://github.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension",
