@@ -21,7 +21,9 @@ If you want to install the plugin from sources, clone the repo and add the folde
 >- Enable Developer Mode
 >- Click: Load Unpacked Extension and select the folder with the plugin data
 ## Usage
-If you open an Integration Flow, the plugin will automatically add a "Messages" and a "Trace" button in the Integration-Flow-Designer. See also the [SAP Community Blog](https://blogs.sap.com/2020/03/05/cpi-chrome-plugin-to-enhance-sap-cloud-platform-integration-usability/#)
+If you open an Integration Flow, the plugin will automatically add a "Messages" and a "Trace" button in the Integration-Flow-Designer. The "Message" button opens a small dragable sidebar with the last messages. You can jump directly to infos and traces of the message run. The "Trace buttons" sets the loglevel of the current Iflow to trace.
+![Screenshot](https://raw.githubusercontent.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension/master/images/screenshots/Full%20screen%20for%20Chrome.png)
+See also the [SAP Community Blog](https://blogs.sap.com/2020/03/05/cpi-chrome-plugin-to-enhance-sap-cloud-platform-integration-usability/#)
 ## Contributing
 See [Contribution guidelines for this project](docs/CONTRIBUTING.md) if you want to take part in this project. As I am a beginner myself, beginners are welcome.
 ## Todos
