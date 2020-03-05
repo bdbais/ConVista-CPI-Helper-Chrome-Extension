@@ -21,9 +21,9 @@ If you want to install the plugin from sources, clone the repo and add the folde
 >- Enable Developer Mode
 >- Click: Load Unpacked Extension and select the folder with the plugin data
 ## Usage
-If you open an Integration Flow, the plugin will automatically add a "Messages" and a "Trace" button in the Integration-Flow-Designer.
+If you open an Integration Flow, the plugin will automatically add a "Messages" and a "Trace" button in the Integration-Flow-Designer. See also the [SAP Community Blog](https://blogs.sap.com/2020/03/05/cpi-chrome-plugin-to-enhance-sap-cloud-platform-integration-usability/#)
 ## Contributing
-See /docs/CONTRIBUTING.md if you want to take part in this project. As I am a beginner myself, beginners are welcome.
+See [Contribution guidelines for this project](docs/CONTRIBUTING.md) if you want to take part in this project. As I am a beginner myself, beginners are welcome.
 ## Todos
 ### New features:
 
@@ -35,7 +35,7 @@ See /docs/CONTRIBUTING.md if you want to take part in this project. As I am a be
 - Find a better way to detect url changes
 - Improve design
 
-If you have any ideas, please write me a message.
+If you have any ideas, please write a message or comment at the [SAP Community](https://blogs.sap.com/2020/03/05/cpi-chrome-plugin-to-enhance-sap-cloud-platform-integration-usability/#)
 
 ## License
 
