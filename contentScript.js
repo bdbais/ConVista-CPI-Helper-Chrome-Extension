@@ -101,7 +101,8 @@ function getLogs() {
             //write date if necessary
             let date = new Date(parseInt(resp[i].LogEnd.match(/\d+/)[0])).toISOString();
             if (date.substr(0, 10) != lastDay) {
-              let dateItem = document.createElement("span");
+              let dateItem = document.createElement("div");
+              dateItem.style["padding-top"] = "5px";
               dateItem.innerText = date.substr(0, 10);
               messageList.appendChild(dateItem)
               lastDay = date.substr(0, 10);
@@ -116,7 +117,7 @@ function getLogs() {
             let traceButton = "<button id='trace--" + i + "' class='" + resp[i].MessageGuid + "'>" + resp[i].LogLevel + "</button>";
             let infoButton = "<button id='info--" + i + "' class='" + resp[i].AlternateWebLink + "'>Log</button>"
 
-            let listItem = document.createElement("li");
+            let listItem = document.createElement("div");
             let statusColor = "#008000";
             if (resp[i].Status == "PROCESSING") {
               statusColor = "#FFC300";
@@ -125,7 +126,7 @@ function getLogs() {
               statusColor = "#C70039";
             }
             listItem.style["color"] = statusColor;
-            listItem.innerHTML = "<button style='background: white; font-size:1rem;' onMouseOver=\"this.style.backgroundColor='#F8F8F8';\" onMouseOut=\"this.style.backgroundColor='#FFFFFF'\"><span style='color:" + statusColor + "' " + flash + "'> " + date.substr(11, 8) + "</span> </button>" + infoButton + traceButton;
+            listItem.innerHTML = "<button style='background: #fbfbfb; font-size:1rem;' onMouseOver=\"this.style.backgroundColor='#F8F8F8';\" onMouseOut=\"this.style.backgroundColor='#fbfbfb'\"><span style='color:" + statusColor + "' " + flash + "'> " + date.substr(11, 8) + "</span> </button>" + infoButton + " " + traceButton;
 
             messageList.appendChild(listItem)
 
@@ -185,7 +186,7 @@ function waitForElementToDisplay(selector, time) {
     if (element) {
 
       //create Trace Button
-      var tracebutton = createElementFromHTML('<button id="__buttonxx" data-sap-ui="__buttonxx" title="Enable traces" class="sapMBtn sapMBtnBase spcHeaderActionButton" style="display: inline-block; padding-left: 0px;"><span id="__buttonxx-inner" class="sapMBtnHoverable sapMBtnInner sapMBtnText sapMBtnTransparent sapMFocusable"><span class="sapMBtnContent" id="__button12-content"><bdi id="__button12-BDI-content">Trace</bdi></span></span></button>');
+      var tracebutton = createElementFromHTML('<button id="__buttonxx" data-sap-ui="__buttonxx" title="Enable traces" class="sapMBtn sapMBtnBase spcHeaderActionButton" style="display: inline-block; margin-left: 0px;"><span id="__buttonxx-inner" class="sapMBtnHoverable sapMBtnInner sapMBtnText sapMBtnTransparent sapMFocusable"><span class="sapMBtnContent" id="__button12-content"><bdi id="__button12-BDI-content">Trace</bdi></span></span></button>');
 
       area = document.querySelector("[id*='--iflowObjectPageHeader-actions']")
       area.appendChild(createElementFromHTML("<br />"));
@@ -313,6 +314,10 @@ var sidebar = {
 
     //inject needed css for sidebar
     var cssStyle = `
+
+    #outerFrame {
+      border: solid 1px #e1e1e1;
+    }
 
     #cpiHelper_content{
       position:fixed;
