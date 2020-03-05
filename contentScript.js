@@ -310,7 +310,7 @@ var sidebar = {
       background:#fbfbfb;
       top:100px;
       right:0px;
-      width:350px;
+      width:275px;
     }   
 
     #cpiHelper_contentheader {
@@ -327,6 +327,7 @@ var sidebar = {
 
     .contentText {
       padding: 5px;
+      overflow-wrap: break-word;
     }
 
     .flash {
@@ -375,7 +376,7 @@ var sidebar = {
     <div id="updatedText" class="contentText"></div>
     
     <ul id="messageList"></ul>
-    <div><button id="closeButton" >Close Messages</button></div>
+    <div><button id="closeButton" >Close Sidebar</button></div>
     
     </div>
     `;
