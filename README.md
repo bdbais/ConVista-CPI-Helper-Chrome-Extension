@@ -3,6 +3,15 @@ This Chrome Plugin extends the SAP Cloud Platform Integration with some useful f
 As SAP is not well known for it's usability it was time to integrate some features ourselves.
 ## Special Thanks
 Many thanks to ConVista Consulting AG in Cologne, Germany. They supported this idea from the beginning and contributed time and ressources for me to start this project. Also many thanks to open this project to the public under GNU GPLv3. I hope there will be many more people to contribute in the future.
+## Changelog
+### 0.2.1
+- [Improvement] Word-wrap when Integration-Flow name is very long
+- [Improvement] Smaller Message-Sidebar
+### 0.2
+First public version.
+- [FEATURE] Message Sidebar
+- [Feature] Trace button 
+
 ## Installation
 You need Google Chrome to install this plugin. I tested it with version 80. I assume that older versions will work too.
 The plugin is not yet in the Chrome Store. So you have to add the plugin from the sources.
