@@ -13,7 +13,7 @@ Many thanks to ConVista Consulting AG in Cologne, Germany. They supported this i
 ## Changelog
 ### 0.3.0
 - [Improvement] A few design changes
-- [FEATURE] Processed message error message on hovering over the message date (if exists)
+- [Feature] Processed message error message on hovering over the message date (if exists)
 ### 0.2.2
 - [Improvement] A few design changes
 ### 0.2.1
@@ -21,7 +21,7 @@ Many thanks to ConVista Consulting AG in Cologne, Germany. They supported this i
 - [Improvement] Smaller Message-Sidebar
 ### 0.2
 First public version.
-- [FEATURE] Message Sidebar
+- [Feature] Message Sidebar
 - [Feature] Trace button 
 
 ## Installation
