@@ -3,7 +3,17 @@ This Chrome Plugin extends the SAP Cloud Platform Integration with some useful f
 As SAP is not well known for it's usability it was time to integrate some features ourselves.
 ## Special Thanks
 Many thanks to ConVista Consulting AG in Cologne, Germany. They supported this idea from the beginning and contributed time and ressources for me to start this project. Also many thanks to open this project to the public under GNU GPLv3. I hope there will be many more people to contribute in the future.
+## Features
+### Integration Flow Designer Improvements
+- Sidebar with processed messages
+- Button to switch on trace
+- Directly go to traces of specific message
+- Directly go to logs and attachements of specific message
+- Popup with error-message when hovering message in sidebar
 ## Changelog
+### 0.3.0
+- [Improvement] A few design changes
+- [FEATURE] Processed message error message on hovering over the message date (if exists)
 ### 0.2.2
 - [Improvement] A few design changes
 ### 0.2.1
@@ -16,12 +26,12 @@ First public version.
 
 ## Installation
 You need Google Chrome to install this plugin. I tested it with version 80. I assume that older versions will work too.
-The plugin is not yet in the Chrome Store. So you have to add the plugin from the sources.
+The plugin is not yet in the Chrome Store but I am applying for it. Until it is accepted, you have to add the plugin from the sources.
 If you want to install the plugin from sources, clone the repo and add the folder directly to Google Chrome
 >- Download or clone the repo from github. Unpack if necessary.
->- In Google Chrome, Navigate to Settings – > Extensions .
->- Enable Developer Mode
->- Click: Load Unpacked Extension and select the folder with the plugin data
+>- In Google Chrome, Navigate to Settings – > Extensions
+>- Enable Developer Mode (slider on the top-right)
+>- Click: "Load Unpacked Extension" and select the folder with the plugin data
 ## Usage
 If you open an Integration Flow, the plugin will automatically add a "Messages" and a "Trace" button in the Integration-Flow-Designer. The "Message" button opens a small dragable sidebar with the last messages. You can jump directly to infos and traces of the message run. The "Trace buttons" sets the loglevel of the current Iflow to trace.
 ![Screenshot](https://raw.githubusercontent.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension/master/images/screenshots/Full%20screen%20for%20Chrome.png)

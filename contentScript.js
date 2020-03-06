@@ -16,6 +16,47 @@ chrome.runtime.onMessage.addListener(
     }
   });
 
+var callCache = new Map();
+function makeCallPromise(method, url, useCache) {
+  return new Promise(function (resolve, reject) {
+    var cache;
+    if (useCache) {
+      cache = callCache.get(method + url);
+    }
+    if (cache) {
+      resolve(cache);
+    } else {
+
+      var xhr = new XMLHttpRequest();
+      xhr.withCredentials = true;
+
+      xhr.open(method, url);
+      xhr.onload = function () {
+        if (this.status >= 200 && this.status < 300) {
+          if (useCache) {
+            callCache.set(method + url, xhr.responseText);
+          }
+          resolve(xhr.responseText);
+        } else {
+          reject({
+            status: this.status,
+            statusText: xhr.statusText
+          });
+        }
+      };
+      xhr.onerror = function () {
+        reject({
+          status: this.status,
+          statusText: xhr.statusText
+        });
+      };
+      xhr.send();
+    }
+  }
+  );
+
+}
+
 //function to make http calls
 function makeCall(type, url, includeXcsrf, payload, callback) {
 
@@ -114,8 +155,8 @@ function getLogs() {
               flash = "class='flash'";
             }
 
-            let traceButton = "<button id='trace--" + i + "' class='" + resp[i].MessageGuid + "'>" + resp[i].LogLevel + "</button>";
-            let infoButton = "<button id='info--" + i + "' class='" + resp[i].AlternateWebLink + "'>Log</button>"
+            let traceButton = createElementFromHTML("<button id='trace--" + i + "' class='" + resp[i].MessageGuid + "'>" + resp[i].LogLevel + "</button>");
+            let infoButton = createElementFromHTML("<button id='info--" + i + "' class='" + resp[i].AlternateWebLink + "'>Log</button>");
 
             let listItem = document.createElement("div");
             let statusColor = "#008000";
@@ -126,7 +167,23 @@ function getLogs() {
               statusColor = "#C70039";
             }
             listItem.style["color"] = statusColor;
-            listItem.innerHTML = "<button style='background: #fbfbfb; font-size:1rem;' onMouseOver=\"this.style.backgroundColor='#F8F8F8';\" onMouseOut=\"this.style.backgroundColor='#fbfbfb'\"><span style='color:" + statusColor + "' " + flash + "'> " + date.substr(11, 8) + "</span> </button>" + infoButton + " " + traceButton;
+
+            let timeButton = createElementFromHTML("<span class='" + resp[i].MessageGuid + "' style='color: " + statusColor + "' " + flash + "' > " + date.substr(11, 8) + "</span >");
+
+            timeButton.onmouseover = (e) => {
+              e.target.style.backgroundColor = '#f0f0f0';
+              infoPopupOpen(e.target.className);
+              infoPopupSetTimeout(null);
+            };
+            timeButton.onmouseout = (e) => {
+              e.target.style.backgroundColor = '#fbfbfb';
+              infoPopupSetTimeout(2000);
+            };
+
+
+            listItem.appendChild(timeButton);
+            listItem.appendChild(infoButton);
+            listItem.appendChild(traceButton);
 
             messageList.appendChild(listItem)
 
@@ -315,6 +372,38 @@ var sidebar = {
     //inject needed css for sidebar
     var cssStyle = `
 
+    #cpiHelper_sidebar_popup
+    {
+      position:fixed;
+      z-index:900;
+      background:#fbfbfb;
+      bottom:50px;
+      right:100px;
+      width:700px;
+      min-height: 1rem;
+      padding: 13px;
+      border: solid 1px #e1e1e1;
+    }
+    #cpiHelper_sidebar_popup.show {
+      visibility: visible;
+      animation: cpiHelper_sidebar_popup_fadein 0.5s;
+    }
+
+    #cpiHelper_sidebar_popup.hide_popup {
+      visibility: hidden;
+      animation: visibility 0s linear 0.5s, cpiHelper_sidebar_popup_fadeout 0.5s;
+    }
+
+    @keyframes cpiHelper_sidebar_popup_fadein {
+      from {bottom: 0; opacity: 0;}
+      to {bottom: 50px; opacity: 1;}
+    }
+
+    @keyframes cpiHelper_sidebar_popup_fadeout {
+      from {bottom: 50px; opacity: 1;}
+      to {bottom: 0; opacity: 0; }
+    }
+
     #outerFrame {
       border: solid 1px #e1e1e1;
     }
@@ -326,6 +415,7 @@ var sidebar = {
       top:100px;
       right:0px;
       width:275px;
+      opacity: 0.9;
     }   
 
     #cpiHelper_contentheader {
@@ -413,6 +503,76 @@ var sidebar = {
     getLogs();
   }
 };
+
+function infoPopupOpen(MessageGuid) {
+  var x = document.getElementById("cpiHelper_sidebar_popup");
+  if (!x) {
+    x = document.createElement('div');
+    x.id = "cpiHelper_sidebar_popup";
+    x.onmouseover = (e) => {
+      infoPopupSetTimeout(null);
+    };
+    x.onmouseout = (e) => {
+      infoPopupSetTimeout(3000);
+    };
+    document.body.appendChild(x);
+  }
+
+  x.innerText = "Please wait...";
+  x.className = "show";
+
+  ///MessageProcessingLogRuns('AF5eUbNwAc1SeL_vdh09y4njOvwO')/RunSteps?$inlinecount=allpages&$format=json&$top=500
+  makeCallPromise("GET", "/itspaces/odata/api/v1/MessageProcessingLogs('" + MessageGuid + "')/Runs?$inlinecount=allpages&$format=json&$top=500", true).then((responseText) => {
+    var resp = JSON.parse(responseText);
+    console.log(resp);
+    return resp.d.results[0].Id;
+  }).then((runId) => {
+
+    return makeCallPromise("GET", "/itspaces/odata/api/v1/MessageProcessingLogRuns('" + runId + "')/RunSteps?$inlinecount=allpages&$format=json&$top=500", true)
+  }).then((responseText) => {
+    var resp = JSON.parse(responseText).d.results;
+    console.log(resp);
+
+    var y = document.getElementById("cpiHelper_sidebar_popup");
+    y.innerText = "";
+
+    let error = false;
+    for (var i = 0; i < resp.length; i++) {
+      if (resp[i].Error) {
+        error = true;
+        let errorText = document.createElement("div");
+        errorText.innerText = resp[i].Error;
+        errorText.style.color = "red";
+        errorText.className = "contentText";
+        y.appendChild(errorText);
+      }
+    }
+    if (!error || resp.length == 0) {
+      let errorText = document.createElement("span");
+      errorText.className = "contentText";
+      y.appendChild(errorText);
+      y.innerText = "No errors found in processed message";
+    }
+  });
+};
+
+var timeOutTimer;
+function infoPopupSetTimeout(milliseconds) {
+  if (milliseconds) {
+    timeOutTimer = setTimeout(() => {
+      infoPopupClose();
+    }, milliseconds);
+  } else {
+    clearTimeout(timeOutTimer);
+  }
+}
+
+function infoPopupClose() {
+  var x = document.getElementById("cpiHelper_sidebar_popup");
+  if (x) {
+    x.className = "hide_popup";
+  }
+}
 
 //function to get the iFlow name from the URL
 function getIflowName() {
