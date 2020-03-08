@@ -140,7 +140,11 @@ function getLogs() {
             thisMessageHashList.push(resp[i].MessageGuid + resp[i].LogStart + resp[i].LogEnd + resp[i].Status);
 
             //write date if necessary
-            let date = new Date(parseInt(resp[i].LogEnd.match(/\d+/)[0])).toISOString();
+            let date = new Date(parseInt(resp[i].LogEnd.match(/\d+/)[0]));
+            //add offset to utc time. The offset is not correct anymore but isostring can be used to show local time
+            date.setTime(date.getTime() - date.getTimezoneOffset() * 60 * 1000);
+            date = date.toISOString();
+
             if (date.substr(0, 10) != lastDay) {
               let dateItem = document.createElement("div");
               dateItem.style["padding-top"] = "5px";

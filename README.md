@@ -11,6 +11,8 @@ Many thanks to ConVista Consulting AG in Cologne, Germany. They supported this i
 - Directly go to logs and attachements of specific message
 - Popup with error-message when hovering message in sidebar
 ## Changelog
+### 0.3.1
+- [Bug] Fixed timezone offset in message sidebar
 ### 0.3.0
 - [Improvement] A few design changes
 - [Feature] Processed message error message on hovering over the message date (if exists)
