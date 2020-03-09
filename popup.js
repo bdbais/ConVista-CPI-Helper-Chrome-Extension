@@ -63,7 +63,71 @@ async function getHost() {
     });
 }
 
+var callCache = new Map();
+function makeCallPromise(method, url, useCache, accept) {
+    return new Promise(function (resolve, reject) {
+        var cache;
+        if (useCache) {
+            cache = callCache.get(method + url);
+        }
+        if (cache) {
+            resolve(cache);
+        } else {
+
+            var xhr = new XMLHttpRequest();
+            xhr.withCredentials = false;
+            xhr.open(method, url);
+            if (accept) {
+                //Example for accept: 'application/json' 
+                xhr.setRequestHeader('Accept', accept);
+            }
+            xhr.onload = function () {
+                if (this.status >= 200 && this.status < 300) {
+                    if (useCache) {
+                        callCache.set(method + url, xhr.responseText);
+                    }
+                    resolve(xhr.responseText);
+                } else {
+                    reject({
+                        status: this.status,
+                        statusText: xhr.statusText
+                    });
+                }
+            };
+            xhr.onerror = function () {
+                reject({
+                    status: this.status,
+                    statusText: xhr.statusText
+                });
+            };
+            xhr.send();
+        }
+    }
+    );
+
+}
+
+//has to be changed when plugin is in chrome store
+function checkUpdate() {
+    var manifestVersion = chrome.runtime.getManifest().version;
+    var cpihelper_version = document.getElementById("cpihelper_version");
+    var html = "<span>You are running version " + manifestVersion + "</span>";
+    cpihelper_version.innerHTML = html;
+
+    makeCallPromise("GET", "https://raw.githubusercontent.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension/master/manifest.json").then((response) => {
+        var serverVersion = JSON.parse(response).version;
+        var manifestVersion = chrome.runtime.getManifest().version;
+        var html = "<span>You are running version " + manifestVersion + "</span>";
+        if (serverVersion != manifestVersion) {
+            html += "<br><span style=\"color: red;\">Please update to version " + serverVersion + "</span>";
+        }
+        var cpihelper_version = document.getElementById("cpihelper_version");
+        cpihelper_version.innerHTML = html;
+    }).catch(console.log);
+}
+
 async function main() {
+    checkUpdate();
     host = await getHost();
     addLastVisitedIflows();
     addTenantUrls();
