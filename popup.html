@@ -5,6 +5,36 @@
 	<style>
 		#main {
 			width: 300px;
+			font-family: 'Arial', sans-serif;
+		}
+
+		/* unvisited link */
+		a:link {
+			color: #009fe3;
+			text-decoration: none;
+		}
+
+		/* visited link */
+		a:visited {
+			color: #009fe3;
+			text-decoration: none;
+		}
+
+		/* mouse over link */
+		a:hover {
+			color: #ff5722;
+			text-decoration: none;
+		}
+
+		#cpiHelper_contentheader {
+			padding: 10px;
+			cursor: move;
+			z-index: 10;
+			background-color: #009fe3;
+			color: #fff;
+		}
+
+		#cpiHelper_content {
 			padding: 3px;
 		}
 	</style>
@@ -13,14 +43,17 @@
 <body>
 
 	<div id="main">
-		This PlugIn was initiated by <a href="https://convista.com" target="_blank">ConVista Consulting AG</a>. Feel
-		free to contribute at our <a href="https://github.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension"
-			target="_blank">Github Page</a>.<br>
-		<br>
-		You run version 0.4.0<br>Check <a href="https://github.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension"
-			target="_blank">Github</a> for updates.
-		<br>
-		<br>License: <a href="https://www.gnu.org/licenses/gpl-3.0.en.html" target="_blank">GNU GPL v3</a>
+		<div id="cpiHelper_contentheader">ConVista CPI Helper</div>
+		<div id="cpiHelper_content">
+			<p>This PlugIn was initiated by <a href=" https://convista.com" target="_blank">ConVista Consulting AG</a>.
+				Feel free to contribute at our
+				<a href="https://github.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension" target="_blank">Github
+					Page</a>.</p>
+			<div id="tenantUrls"></div>
+			<p>You run version 0.4.0<br>Check <a href="https://github.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension"
+					target="_blank">Github</a> for updates.</p>
+			<p>License: <a href="https://www.gnu.org/licenses/gpl-3.0.en.html" target="_blank">GNU GPL v3</a></p>
+		</div>
 	</div>
 
 	<script src="popup.js"></script>
