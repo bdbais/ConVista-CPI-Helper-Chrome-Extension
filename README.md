@@ -11,7 +11,13 @@ Many thanks to ConVista Consulting AG in Cologne, Germany. They supported this i
 - Directly go to logs and attachements of specific message
 - Popup with error-message when hovering message in sidebar
 - Popup with deployment info
+- Last visited iflows in browser-bar-popup
+- Useful links in browser-bar-popup
 ## Changelog
+### 0.5.0
+- [Improvement] Improved design of plugin-popup in browser-bar
+- [Feature] Added last visited iflows in browser-bar-popup
+- [Feature] Added useful links in browser-bar-popup
 ### 0.4.0
 - [Feature] Added popup with deployment info
 ### 0.3.1

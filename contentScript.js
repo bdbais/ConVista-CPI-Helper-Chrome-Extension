@@ -596,6 +596,7 @@ function handleUrlChange() {
     //if iflow found, inject buttons and add css
     //css
     initIflowPage();
+    storeVisitedIflowsForPopup();
     //buttons
     waitForElementToDisplay("[id*='-BDI-content']", 1000);
   } else {
@@ -604,6 +605,40 @@ function handleUrlChange() {
       sidebar.deactivate();
     }
   }
+}
+
+function storeVisitedIflowsForPopup() {
+  var host = document.location.href.split("/")[2].split(".")[0];
+  var name = 'visitedIflows_' + host;
+  chrome.storage.sync.get([name], function (result) {
+    var visitedIflows = result[name];
+
+    if (!visitedIflows) {
+      visitedIflows = [];
+    }
+
+
+
+    if (visitedIflows.length > 0) {
+      visitedIflows = visitedIflows.filter((element) => {
+        return element.name != cpiData.integrationFlowId;
+      });
+    }
+
+    visitedIflows.push({ name: cpiData.integrationFlowId, "url": document.location.href, "favorit": false });
+
+    if (visitedIflows.length > 10) {
+      visitedIflows.shift();
+    }
+
+    var obj = {};
+    obj[name] = visitedIflows;
+
+    chrome.storage.sync.set(obj, function () {
+      console.log("iflow saved");
+    });
+
+  });
 }
 
 function initIflowPage() {
