@@ -10,7 +10,10 @@ Many thanks to ConVista Consulting AG in Cologne, Germany. They supported this i
 - Directly go to traces of specific message
 - Directly go to logs and attachements of specific message
 - Popup with error-message when hovering message in sidebar
+- Popup with deployment info
 ## Changelog
+### 0.4.0
+- [Feature] Added popup with deployment info
 ### 0.3.1
 - [Bug] Fixed timezone offset in message sidebar
 ### 0.3.0
