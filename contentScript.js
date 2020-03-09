@@ -17,7 +17,7 @@ chrome.runtime.onMessage.addListener(
   });
 
 var callCache = new Map();
-function makeCallPromise(method, url, useCache) {
+function makeCallPromise(method, url, useCache, accept) {
   return new Promise(function (resolve, reject) {
     var cache;
     if (useCache) {
@@ -29,8 +29,11 @@ function makeCallPromise(method, url, useCache) {
 
       var xhr = new XMLHttpRequest();
       xhr.withCredentials = true;
-
       xhr.open(method, url);
+      if (accept) {
+        //Example for accept: 'application/json' 
+        xhr.setRequestHeader('Accept', accept);
+      }
       xhr.onload = function () {
         if (this.status >= 200 && this.status < 300) {
           if (useCache) {
@@ -111,7 +114,7 @@ function getLogs() {
   }
 
   //get the messagelogs for current iflow
-  makeCall("GET", "/itspaces/odata/api/v1/MessageProcessingLogs?$filter=IntegrationFlowName eq '" + iflowId + "'&$top=15&$format=json&$orderby=LogStart desc", false, "", (xhr) => {
+  makeCall("GET", "/itspaces/odata/api/v1/MessageProcessingLogs?$filter=IntegrationFlowName eq '" + iflowId + "'&$top=10&$format=json&$orderby=LogStart desc", false, "", (xhr) => {
 
     if (xhr.readyState == 4) {
 
@@ -248,20 +251,21 @@ function waitForElementToDisplay(selector, time) {
 
       //create Trace Button
       var tracebutton = createElementFromHTML('<button id="__buttonxx" data-sap-ui="__buttonxx" title="Enable traces" class="sapMBtn sapMBtnBase spcHeaderActionButton" style="display: inline-block; margin-left: 0px;"><span id="__buttonxx-inner" class="sapMBtnHoverable sapMBtnInner sapMBtnText sapMBtnTransparent sapMFocusable"><span class="sapMBtnContent" id="__button12-content"><bdi id="__button12-BDI-content">Trace</bdi></span></span></button>');
+      //Create Toggle Message Bar Button
+      var messagebutton = createElementFromHTML(' <button id="__buttonxy" data-sap-ui="__buttonxy" title="Messages" class="sapMBtn sapMBtnBase spcHeaderActionButton" style="display: inline-block;"><span id="__buttonxy-inner" class="sapMBtnHoverable sapMBtnInner sapMBtnText sapMBtnTransparent sapMFocusable"><span class="sapMBtnContent" id="__button13-content"><bdi id="__button13-BDI-content">Messages</bdi></span></span></button>');
+      var infobutton = createElementFromHTML(' <button id="__buttoninfo" data-sap-ui="__buttoninfo" title="Info" class="sapMBtn sapMBtnBase spcHeaderActionButton" style="display: inline-block;"><span id="__buttonxy-inner" class="sapMBtnHoverable sapMBtnInner sapMBtnText sapMBtnTransparent sapMFocusable"><span class="sapMBtnContent" id="__button13-content"><bdi id="__button13-BDI-content">Info</bdi></span></span></button>');
 
+      //append buttons
       area = document.querySelector("[id*='--iflowObjectPageHeader-actions']")
       area.appendChild(createElementFromHTML("<br />"));
       area.appendChild(tracebutton);
+      area.appendChild(messagebutton);
+      area.appendChild(infobutton);
+
 
       tracebutton.addEventListener("click", (btn) => {
         setLogLevel("TRACE", cpiData.integrationFlowId);
       })
-
-      //Create Toggle Message Bar Button
-      var messagebutton = createElementFromHTML(' <button id="__buttonxy" data-sap-ui="__buttonxy" title="Messages" class="sapMBtn sapMBtnBase spcHeaderActionButton" style="display: inline-block;"><span id="__buttonxy-inner" class="sapMBtnHoverable sapMBtnInner sapMBtnText sapMBtnTransparent sapMFocusable"><span class="sapMBtnContent" id="__button13-content"><bdi id="__button13-BDI-content">Messages</bdi></span></span></button>');
-
-      area = document.querySelector("[id*='--iflowObjectPageHeader-actions']")
-      area.appendChild(messagebutton);
 
       messagebutton.addEventListener("click", (btn) => {
         if (sidebar.active) {
@@ -269,6 +273,10 @@ function waitForElementToDisplay(selector, time) {
         } else {
           sidebar.init();
         }
+      });
+
+      infobutton.addEventListener("click", (btn) => {
+        getIflowInfo(openIflowInfoPopup);
       })
       return;
     } else {
@@ -284,66 +292,82 @@ function waitForElementToDisplay(selector, time) {
   }
 }
 
+//Collect Infos to Iflow
+function getIflowInfo(callback) {
+
+  makeCallPromise("GET", "/itspaces/Operations/com.sap.it.op.tmn.commands.dashboard.webui.IntegrationComponentsListCommand", false, 'application/json').then((response) => {
+    var resp = JSON.parse(response).artifactInformations;
+    resp = resp.find((element) => {
+      return element.symbolicName == cpiData.integrationFlowId;
+    });
+    if (!resp) {
+      throw "Integration Flow was not found. Probably it is not deployed.";
+    }
+    return makeCallPromise("GET", "/itspaces/Operations/com.sap.it.op.tmn.commands.dashboard.webui.IntegrationComponentDetailCommand?artifactId=" + resp.id, false, 'application/json');
+  }).then((response) => {
+    var resp = JSON.parse(response);
+    cpiData.flowData = resp;
+    cpiData.flowData.lastUpdate = new Date().toISOString();
+    callback();
+    return;
+  }).catch((error) => {
+    showSnackbar(JSON.stringify(error));
+  });
+}
+
+function openIflowInfoPopup() {
+  //create iflowInfo div element
+  var x = document.getElementById("iflowInfo");
+  if (!x) {
+    x = document.createElement('div');
+    x.id = "iflowInfo";
+    document.body.appendChild(x);
+  }
+  x.style.display = "block";
+  x.innerHTML = "";
+
+  var textElement = `
+  <div id="iflowInfo_outerFrame">
+  <div id="iflowInfo_contentheader">ConVista CPI Helper<span id="modal_close">X</div>
+    <div id="iflowInfo_content">
+    
+  <div>Name: ${cpiData?.flowData?.artifactInformation?.name}</div>
+  <div>SymbolicName: ${cpiData?.flowData?.artifactInformation?.symbolicName}</div>
+  <div>Trace: ${cpiData?.flowData?.logConfiguration?.traceActive}</div>
+  <div>UTC DeployedOn: ${cpiData?.flowData?.artifactInformation?.deployedOn}</div>
+  <div>DeploymentState: ${cpiData?.flowData?.artifactInformation?.deployState}</div>
+  <div>SemanticState: ${cpiData?.flowData?.artifactInformation?.semanticState}</div>
+  <div>DeployedBy: ${cpiData?.flowData?.artifactInformation?.deployedBy}</div>
+  </div> 
+  </div>
+  `;
+
+  x.appendChild(createElementFromHTML(textElement));
+  var span = document.getElementById("modal_close");
+  span.onclick = (element) => {
+    var x = document.getElementById("iflowInfo");
+    x.style.display = "none";
+  };
+
+  if (cpiData.flowData.endpointInformation.length > 0) {
+    cpiData.flowData.endpointInformation.forEach(element => {
+      var root = document.getElementById("iflowInfo_content");
+      var e = document.createElement('div');
+      e.innerHTML = `<div>${element?.protocol}:</div>`;
+      root.appendChild(e);
+      for (var i = 0; i < element.endpointInstances.length; i++) {
+        let f = document.createElement('div');
+        f.className = "contentText";
+        f.innerText = `${element.endpointInstances[i]?.endpointCategory}: ${element.endpointInstances[i]?.endpointUrl}`;
+        e.appendChild(f);
+      }
+    });
+  }
+}
+
 //snackbar for messages (e.g. trace is on)
 function showSnackbar(message) {
-
-  //inject css that is used for the snackbar
-  var cssStyle = `
-
-  /* start snackbar */
-
-  #snackbar {
-    visibility: hidden;
-    min-width: 250px;
-    margin-left: -125px;
-    background-color: #333;
-    color: #fff;
-    text-align: center;
-    border-radius: 2px;
-    padding: 16px;
-    position: fixed;
-    z-index: 1;
-    left: 50%;
-    bottom: 30px;
-    font-size: 17px;
-  }
-  
-  #snackbar.show {
-    visibility: visible;
-    -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
-    animation: fadein 0.5s, fadeout 0.5s 2.5s;
-  }
-  
-  @-webkit-keyframes fadein {
-    from {bottom: 0; opacity: 0;} 
-    to {bottom: 30px; opacity: 1;}
-  }
-  
-  @keyframes fadein {
-    from {bottom: 0; opacity: 0;}
-    to {bottom: 30px; opacity: 1;}
-  }
-  
-  @-webkit-keyframes fadeout {
-    from {bottom: 30px; opacity: 1;} 
-    to {bottom: 0; opacity: 0;}
-  }
-  
-  @keyframes fadeout {
-    from {bottom: 30px; opacity: 1;}
-    to {bottom: 0; opacity: 0;}
-  }
-
-/* end snackbar */  `;
-
-  var style = document.createElement('style');
-  style.type = 'text/css';
-  if (style.styleSheet) {
-    style.styleSheet.cssText = cssStyle;
-  } else {
-    style.appendChild(document.createTextNode(cssStyle));
-  }
-  document.getElementsByTagName('head')[0].appendChild(style);
+  //css for snackbar is already there. see initIflowPage()
 
   //create snackbar div element
   var x = document.getElementById("snackbar");
@@ -372,109 +396,6 @@ var sidebar = {
   //function to create and initialise the message sidebar
   init: function () {
     this.active = true;
-
-    //inject needed css for sidebar
-    var cssStyle = `
-
-    #cpiHelper_sidebar_popup
-    {
-      position:fixed;
-      z-index:900;
-      background:#fbfbfb;
-      bottom:50px;
-      right:100px;
-      width:700px;
-      min-height: 1rem;
-      padding: 13px;
-      border: solid 1px #e1e1e1;
-    }
-    #cpiHelper_sidebar_popup.show {
-      visibility: visible;
-      animation: cpiHelper_sidebar_popup_fadein 0.5s;
-    }
-
-    #cpiHelper_sidebar_popup.hide_popup {
-      visibility: hidden;
-      animation: visibility 0s linear 0.5s, cpiHelper_sidebar_popup_fadeout 0.5s;
-    }
-
-    @keyframes cpiHelper_sidebar_popup_fadein {
-      from {bottom: 0; opacity: 0;}
-      to {bottom: 50px; opacity: 1;}
-    }
-
-    @keyframes cpiHelper_sidebar_popup_fadeout {
-      from {bottom: 50px; opacity: 1;}
-      to {bottom: 0; opacity: 0; }
-    }
-
-    #outerFrame {
-      border: solid 1px #e1e1e1;
-    }
-
-    #cpiHelper_content{
-      position:fixed;
-      z-index:1000;
-      background:#fbfbfb;
-      top:100px;
-      right:0px;
-      width:275px;
-      opacity: 0.9;
-    }   
-
-    #cpiHelper_contentheader {
-      padding: 10px;
-      cursor: move;
-      z-index: 10;
-      background-color: #009fe3;
-      color: #fff;
-    }
-
-    button {
-      border: none;
-    }
-
-    .contentText {
-      padding: 5px;
-      overflow-wrap: break-word;
-    }
-
-    .flash {
-      animation-name: flash;
-      animation-duration: 3s;
-      animation-timing-function: linear;
-      animation-iteration-count: infinite;
-      animation-direction: alternate;
-      animation-play-state: running;
-    animation-iteration-count: 1;
-    }
-
-    @keyframes flash {
-      from {background: orange;}
-      to {background: none;}
-    }
-
-    li {
-       position: relative;    /* It is required for setting position to absolute in the next rule. */
-    }
-
-    li::before {
-      "content: '•';
-      position: absolute;
-      left: -1.2em;          /* Adjust this value so that it appears where you want. */
-      font-size: 1em;      /* Adjust this value so that it appears what size you want. */
-    }
-    
-    `;
-
-    var style = document.createElement('style');
-    style.type = 'text/css';
-    if (style.styleSheet) {
-      style.styleSheet.cssText = cssStyle;
-    } else {
-      style.appendChild(document.createTextNode(cssStyle));
-    }
-    document.getElementsByTagName('head')[0].appendChild(style);
 
     //create sidebar div
     var elem = document.createElement('div');
@@ -507,6 +428,17 @@ var sidebar = {
     getLogs();
   }
 };
+
+function injectCss(cssStyle) {
+  var style = document.createElement('style');
+  style.type = 'text/css';
+  if (style.styleSheet) {
+    style.styleSheet.cssText = cssStyle;
+  } else {
+    style.appendChild(document.createTextNode(cssStyle));
+  }
+  document.getElementsByTagName('head')[0].appendChild(style);
+}
 
 function infoPopupOpen(MessageGuid) {
   var x = document.getElementById("cpiHelper_sidebar_popup");
@@ -557,6 +489,8 @@ function infoPopupOpen(MessageGuid) {
       y.appendChild(errorText);
       y.innerText = "No errors found in processed message";
     }
+  }).catch((error) => {
+    showSnackbar(JSON.stringify(error));
   });
 };
 
@@ -588,7 +522,7 @@ function getIflowName() {
     let groups = url.match(dateRegexp).groups;
 
     result = groups.integrationFlowId;
-    console.log("Found iFlow:" + cpiData.integrationFlowId);
+    console.log("Found iFlow:" + result);
 
   } catch (e) {
     console.log(e);
@@ -659,7 +593,10 @@ function dragElement(elmnt) {
 //this function is fired when the url changes
 function handleUrlChange() {
   if (getIflowName()) {
-    //if iflow found, inject buttons
+    //if iflow found, inject buttons and add css
+    //css
+    initIflowPage();
+    //buttons
     waitForElementToDisplay("[id*='-BDI-content']", 1000);
   } else {
     //deactivate sidebar if not on iflow page
@@ -667,6 +604,211 @@ function handleUrlChange() {
       sidebar.deactivate();
     }
   }
+}
+
+function initIflowPage() {
+  //inject css that is used for the snackbar
+  var cssStyle = `
+
+    /* start snackbar */
+  
+    #snackbar {
+      visibility: hidden;
+      min-width: 250px;
+      margin-left: -125px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 2px;
+      padding: 16px;
+      position: fixed;
+      z-index: 1;
+      left: 50%;
+      bottom: 30px;
+      font-size: 17px;
+    }
+    
+    #snackbar.show {
+      visibility: visible;
+      -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+      animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    }
+    
+    @-webkit-keyframes fadein {
+      from {bottom: 0; opacity: 0;} 
+      to {bottom: 30px; opacity: 1;}
+    }
+    
+    @keyframes fadein {
+      from {bottom: 0; opacity: 0;}
+      to {bottom: 30px; opacity: 1;}
+    }
+    
+    @-webkit-keyframes fadeout {
+      from {bottom: 30px; opacity: 1;} 
+      to {bottom: 0; opacity: 0;}
+    }
+    
+    @keyframes fadeout {
+      from {bottom: 30px; opacity: 1;}
+      to {bottom: 0; opacity: 0;}
+    }
+  
+  /* end snackbar */  `;
+
+  injectCss(cssStyle);
+
+  //inject needed css for sidebar
+  cssStyle = `
+
+      #cpiHelper_sidebar_popup
+      {
+        position:fixed;
+        z-index:900;
+        background:#fbfbfb;
+        bottom:50px;
+        right:100px;
+        width:700px;
+        min-height: 1rem;
+        padding: 13px;
+        border: solid 1px #e1e1e1;
+      }
+      #cpiHelper_sidebar_popup.show {
+        visibility: visible;
+        animation: cpiHelper_sidebar_popup_fadein 0.5s;
+      }
+  
+      #cpiHelper_sidebar_popup.hide_popup {
+        visibility: hidden;
+        animation: visibility 0s linear 0.5s, cpiHelper_sidebar_popup_fadeout 0.5s;
+      }
+  
+      @keyframes cpiHelper_sidebar_popup_fadein {
+        from {bottom: 0; opacity: 0;}
+        to {bottom: 50px; opacity: 1;}
+      }
+  
+      @keyframes cpiHelper_sidebar_popup_fadeout {
+        from {bottom: 50px; opacity: 1;}
+        to {bottom: 0; opacity: 0; }
+      }
+  
+      #outerFrame {
+        border: solid 1px #e1e1e1;
+      }
+  
+      #cpiHelper_content{
+        position:fixed;
+        z-index:1000;
+        background:#fbfbfb;
+        top:100px;
+        right:0px;
+        width:275px;
+        opacity: 0.9;
+      }   
+  
+      #cpiHelper_contentheader {
+        padding: 10px;
+        cursor: move;
+        z-index: 10;
+        background-color: #009fe3;
+        color: #fff;
+      }
+  
+      button {
+        border: none;
+      }
+  
+      .contentText {
+        padding: 5px;
+        overflow-wrap: break-word;
+      }
+  
+      .flash {
+        animation-name: flash;
+        animation-duration: 3s;
+        animation-timing-function: linear;
+        animation-iteration-count: infinite;
+        animation-direction: alternate;
+        animation-play-state: running;
+      animation-iteration-count: 1;
+      }
+  
+      @keyframes flash {
+        from {background: orange;}
+        to {background: none;}
+      }
+  
+      li {
+         position: relative;    /* It is required for setting position to absolute in the next rule. */
+      }
+  
+      li::before {
+        "content: '•';
+        position: absolute;
+        left: -1.2em;          /* Adjust this value so that it appears where you want. */
+        font-size: 1em;      /* Adjust this value so that it appears what size you want. */
+      }
+      
+      `;
+
+  injectCss(cssStyle);
+
+  //infoPopup
+  cssStyle = `
+  /* Modal Content */
+
+  #iflowInfo {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    left: 0;
+    top: 0;
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  }
+
+  #iflowInfo_outerFrame {
+    background:#fbfbfb;
+    margin: auto;
+    margin-top: 100px;
+      width: 80%;
+    min-height: 1rem;
+  }
+  #iflowInfo_content {
+    border: solid 1px #e1e1e1;
+    padding: 13px;
+   
+  }
+  #iflowInfo_contentheader {
+    padding: 10px;
+  
+    z-index: 10;
+    background-color: #009fe3;
+    color: #fff;
+  }
+
+  
+  /* The Close Button */
+  #modal_close {
+    color: #aaaaaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
+  
+  #modal_close:hover,
+  #modal_close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  `;
+
+  injectCss(cssStyle);
 }
 
 //start
