@@ -46,7 +46,7 @@ If you want to install the plugin from sources, clone the repo and add the folde
 >- Click: "Load Unpacked Extension" and select the folder with the plugin data
 ## Update
 Please replace the folder with the new version on your disk. After that you must delete and add the plugin in Chrome Browser.
-If you cloned the repository, pull new data and delete and add the plugin in Chrome.
+If you have cloned the repository, pull new data. Than delete and add the plugin in Chrome. Restart Chrome.
 ## Usage
 If you open an Integration Flow, the plugin will automatically add a "Messages" and a "Trace" button in the Integration-Flow-Designer. The "Message" button opens a small dragable sidebar with the last messages. You can jump directly to infos and traces of the message run. The "Trace buttons" sets the loglevel of the current Iflow to trace.
 ![Screenshot](https://raw.githubusercontent.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension/master/images/screenshots/Full%20screen%20for%20Chrome.png)

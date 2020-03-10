@@ -369,17 +369,18 @@ function openIflowInfoPopup() {
 
   var root = document.getElementById("iflowInfo_content");
 
-  if (cpiData.flowData.endpointInformation.length > 0) {
+  if (cpiData.flowData.endpointInformation && cpiData.flowData.endpointInformation.length > 0) {
     cpiData.flowData.endpointInformation.forEach(element => {
-
-      var e = document.createElement('div');
-      e.innerHTML = `<div>${element?.protocol}:</div>`;
-      root.appendChild(e);
-      for (var i = 0; i < element.endpointInstances.length; i++) {
-        let f = document.createElement('div');
-        f.className = "contentText";
-        f.innerText = `${element.endpointInstances[i]?.endpointCategory}: ${element.endpointInstances[i]?.endpointUrl}`;
-        e.appendChild(f);
+      if (element.endpointInstances && element.endpointInstances.length > 0) {
+        var e = document.createElement('div');
+        e.innerHTML = `<div>${element?.protocol}:</div>`;
+        root.appendChild(e);
+        for (var i = 0; i < element.endpointInstances.length; i++) {
+          let f = document.createElement('div');
+          f.className = "contentText";
+          f.innerText = `${element.endpointInstances[i]?.endpointCategory}: ${element.endpointInstances[i]?.endpointUrl}`;
+          e.appendChild(f);
+        }
       }
     });
   }
