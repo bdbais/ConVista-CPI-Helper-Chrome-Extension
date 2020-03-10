@@ -18,6 +18,7 @@ Many thanks to ConVista Consulting AG in Cologne, Germany. They supported this i
 - [Improvement] Improved design of plugin-popup in browser-bar
 - [Feature] Added last visited iflows in browser-bar-popup
 - [Feature] Added useful links in browser-bar-popup
+- [Feature] Added undeploy button in info-popup
 ### 0.4.0
 - [Feature] Added popup with deployment info
 ### 0.3.1
