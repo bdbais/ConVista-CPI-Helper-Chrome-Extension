@@ -221,7 +221,7 @@ function getLogs() {
 //makes a http call to set the log level to trace
 function setLogLevel(logLevel, iflowId) {
   makeCall("POST", "/itspaces/Operations/com.sap.it.op.tmn.commands.dashboard.webui.IntegrationComponentSetMplLogLevelCommand", true, '{"artifactSymbolicName":"' + iflowId + '","mplLogLevel":"' + logLevel.toUpperCase() + '","nodeType":"IFLMAP"}', (xhr) => {
-    if (xhr.readyState == 4) {
+    if (xhr.readyState == 4 && xhr.status == 200) {
       showSnackbar("Trace activated");
     }
     else {
@@ -734,7 +734,7 @@ function initIflowPage() {
   
       #cpiHelper_content{
         position:fixed;
-        z-index:1000;
+        z-index:700;
         background:#fbfbfb;
         top:100px;
         right:0px;
@@ -796,7 +796,7 @@ function initIflowPage() {
   #iflowInfo {
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
-    z-index: 1; /* Sit on top */
+    z-index: 800; /* Sit on top */
     width: 100%; /* Full width */
     height: 100%; /* Full height */
     left: 0;
