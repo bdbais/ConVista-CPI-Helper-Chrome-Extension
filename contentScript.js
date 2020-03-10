@@ -61,14 +61,14 @@ function makeCallPromise(method, url, useCache, accept) {
 }
 
 //function to make http calls
-function makeCall(type, url, includeXcsrf, payload, callback) {
+function makeCall(type, url, includeXcsrf, payload, callback, contentType) {
 
   var xhr = new XMLHttpRequest();
   xhr.withCredentials = true;
   xhr.open(type, url, true);
 
-  if (payload) {
-    xhr.setRequestHeader('Content-type', 'application/json');
+  if (contentType) {
+    xhr.setRequestHeader('Content-type', contentType);
   }
 
   if (includeXcsrf) {
@@ -227,9 +227,20 @@ function setLogLevel(logLevel, iflowId) {
     else {
       showSnackbar("Error activating Trace");
     }
-  });
+  }, 'application/json');
 }
 
+//makes a http call to set the log level to trace
+function undeploy(tenant, artifactId) {
+  makeCall("POST", "/itspaces/Operations/com.sap.it.nm.commands.deploy.DeleteContentCommand", true, 'artifactIds=' + artifactId + '&tenantId=' + tenant, (xhr) => {
+    if (xhr.readyState == 4 && xhr.status == 200) {
+      showSnackbar("Undeploy triggered");
+    }
+    else {
+      showSnackbar("Error triggering undeploy");
+    }
+  }, "application/x-www-form-urlencoded; charset=UTF-8");
+}
 
 function createElementFromHTML(htmlString) {
   var div = document.createElement('div');
@@ -326,6 +337,12 @@ function openIflowInfoPopup() {
   x.style.display = "block";
   x.innerHTML = "";
 
+  var deployedOn = cpiData?.flowData?.artifactInformation?.deployedOn;
+  if (deployedOn) {
+    let date = new Date(deployedOn);
+    deployedOn = date.toLocaleDateString() + " " + date.toLocaleTimeString();
+  }
+
   var textElement = `
   <div id="iflowInfo_outerFrame">
   <div id="iflowInfo_contentheader">ConVista CPI Helper<span id="modal_close">X</div>
@@ -334,7 +351,7 @@ function openIflowInfoPopup() {
   <div>Name: ${cpiData?.flowData?.artifactInformation?.name}</div>
   <div>SymbolicName: ${cpiData?.flowData?.artifactInformation?.symbolicName}</div>
   <div>Trace: ${cpiData?.flowData?.logConfiguration?.traceActive}</div>
-  <div>UTC DeployedOn: ${cpiData?.flowData?.artifactInformation?.deployedOn}</div>
+  <div>DeployedOn: ${deployedOn}</div>
   <div>DeploymentState: ${cpiData?.flowData?.artifactInformation?.deployState}</div>
   <div>SemanticState: ${cpiData?.flowData?.artifactInformation?.semanticState}</div>
   <div>DeployedBy: ${cpiData?.flowData?.artifactInformation?.deployedBy}</div>
@@ -349,9 +366,12 @@ function openIflowInfoPopup() {
     x.style.display = "none";
   };
 
+
+  var root = document.getElementById("iflowInfo_content");
+
   if (cpiData.flowData.endpointInformation.length > 0) {
     cpiData.flowData.endpointInformation.forEach(element => {
-      var root = document.getElementById("iflowInfo_content");
+
       var e = document.createElement('div');
       e.innerHTML = `<div>${element?.protocol}:</div>`;
       root.appendChild(e);
@@ -362,6 +382,16 @@ function openIflowInfoPopup() {
         e.appendChild(f);
       }
     });
+  }
+
+  if (deployedOn) {
+    var undeploybutton = document.createElement('button');
+    undeploybutton.innerText = "Undeploy";
+    undeploybutton.id = "undeploybutton";
+    undeploybutton.addEventListener("click", (a) => {
+      undeploy(cpiData?.flowData?.artifactInformation?.tenantId, cpiData?.flowData?.artifactInformation?.id);
+    });
+    root.appendChild(undeploybutton);
   }
 }
 
