@@ -13,8 +13,10 @@ Many thanks to ConVista Consulting AG in Cologne, Germany. They supported this i
 - Directly go to logs and attachements of specific message
 - Popup with error-message when hovering message in sidebar
 - Popup with deployment info
-- Last visited iflows in browser-bar-popup
+
+### General CPI Improvements
 - Useful links in browser-bar-popup
+- Last visited iflows in browser-bar-popup
 
 ## Changelog
 ### 0.5.3
@@ -48,7 +50,7 @@ There are two options to install this plugin:
 ### Install directly from Chrome Web Store (recommended)
 Just add the plugin in the [Chrome Web Store](https://chrome.google.com/webstore/detail/convista-sap-cpi-helper/eaddejljhdjeddibkomjfonojmcegkna).
 This is probably the easiest way. Updates will be installed automatically.
-### Install in developer mode from sources
+### Install in Developer Mode from Sources
 If you know what you are doing, you can install the plugin directly from sources.
 Clone the repo and add the folder directly to Google Chrome
 >- Download or clone the repo from github. Unpack if necessary.
@@ -83,11 +85,11 @@ See also the [SAP Community Blog](https://blogs.sap.com/2020/03/05/cpi-chrome-pl
 See [Contribution guidelines for this project](docs/CONTRIBUTING.md) if you want to take part in this project. As I am a beginner myself, beginners are welcome.
 
 ## Todos
-### New features:
+### New Features:
 
 - Add possibility to show errors, payloads, properties and headers from messages directly in the design screen
 
-### Things to improve:
+### Things to Improve:
 - Find a better way to get the X-CSRF-Token. Currently there is a background javascript for that.
 - Find a better way to detect url changes
 - Improve design

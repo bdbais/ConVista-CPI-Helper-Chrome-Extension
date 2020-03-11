@@ -105,6 +105,7 @@ function openInfo(url) {
 }
 
 //refresh the logs in message window
+var getLogsTimer;
 function getLogs() {
 
   //check if iflowid exists
@@ -212,7 +213,7 @@ function getLogs() {
       }
       //new update in 3 seconds
       if (sidebar.active) {
-        setTimeout(getLogs, 3000);
+        var getLogsTimer = setTimeout(getLogs, 3000);
       }
     }
   });
@@ -424,6 +425,7 @@ var sidebar = {
   //function to deactivate the sidebar
   deactivate: function () {
     this.active = false;
+    clearTimeout(getLogsTimer);
     document.getElementById("cpiHelper_content").remove();
   },
 
