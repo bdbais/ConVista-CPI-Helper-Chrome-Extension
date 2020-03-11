@@ -14,6 +14,9 @@ Many thanks to ConVista Consulting AG in Cologne, Germany. They supported this i
 - Last visited iflows in browser-bar-popup
 - Useful links in browser-bar-popup
 ## Changelog
+### 0.5.3
+- [Bugfix] Info-popup deployed on time is now in locale time zone
+- [Bugfix] Fixed bug in info-popup
 ### 0.5.0
 - [Improvement] Improved design of plugin-popup in browser-bar
 - [Feature] Added last visited iflows in browser-bar-popup
