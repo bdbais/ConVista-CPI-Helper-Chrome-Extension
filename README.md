@@ -51,8 +51,20 @@ If you want to install the plugin from sources, clone the repo and add the folde
 Please replace the folder with the new version on your disk. After that you must delete and add the plugin in Chrome Browser.
 If you have cloned the repository, pull new data. Than delete and add the plugin in Chrome. Restart Chrome.
 ## Usage
-If you open an Integration Flow, the plugin will automatically add a "Messages" and a "Trace" button in the Integration-Flow-Designer. The "Message" button opens a small dragable sidebar with the last messages. You can jump directly to infos and traces of the message run. The "Trace buttons" sets the loglevel of the current Iflow to trace.
-![Screenshot](https://raw.githubusercontent.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension/master/images/screenshots/Full%20screen%20for%20Chrome.png)
+### New Buttons
+If you open an Integration Flow, the plugin will automatically add a "Messages", a "Trace" and a "Info" button in the Integration-Flow-Designer. 
+#### Message Button
+The "Message" button opens a small dragable sidebar with the last processed messages. You can jump directly to infos and traces of the message run. If you hover messages with error, you will see the error message directly. 
+![Screenshot](https://raw.githubusercontent.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension/master/images/screenshots/chrome1.png)
+![Screenshot](https://raw.githubusercontent.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension/master/images/screenshots/chrome3.png)
+#### Trace Button
+The "Trace buttons" sets the loglevel of the current Iflow to trace.
+#### Info Button
+The "Info"-Button lets you see detailed informations of the deployment state of your Integration Flow.
+![Screenshot](https://raw.githubusercontent.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension/master/images/screenshots/chrome2.png)
+### Toolbar Popup
+The button of the plugin in the toolbar gives you a list of useful links of you current tenant. It includes last visited Integration Flows.
+![Screenshot](https://raw.githubusercontent.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension/master/images/screenshots/chrome4.png)
 See also the [SAP Community Blog](https://blogs.sap.com/2020/03/05/cpi-chrome-plugin-to-enhance-sap-cloud-platform-integration-usability/#)
 ## Contributing
 See [Contribution guidelines for this project](docs/CONTRIBUTING.md) if you want to take part in this project. As I am a beginner myself, beginners are welcome.
