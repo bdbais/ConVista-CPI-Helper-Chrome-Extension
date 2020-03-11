@@ -56,7 +56,8 @@ If you open an Integration Flow, the plugin will automatically add a "Messages",
 #### Message Button
 The "Message" button opens a small dragable sidebar with the last processed messages. You can jump directly to infos and traces of the message run. If you hover messages with error, you will see the error message directly. 
 ![Screenshot](https://raw.githubusercontent.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension/master/images/screenshots/chrome1.png)
-![Screenshot](https://raw.githubusercontent.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension/master/images/screenshots/chrome3.png)
+
+![Screenshot](https://raw.githubusercontent.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension/master/images/screenshots/chrome4.png)
 #### Trace Button
 The "Trace buttons" sets the loglevel of the current Iflow to trace.
 #### Info Button
@@ -64,7 +65,7 @@ The "Info"-Button lets you see detailed informations of the deployment state of 
 ![Screenshot](https://raw.githubusercontent.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension/master/images/screenshots/chrome2.png)
 ### Toolbar Popup
 The button of the plugin in the toolbar gives you a list of useful links of you current tenant. It includes last visited Integration Flows.
-![Screenshot](https://raw.githubusercontent.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension/master/images/screenshots/chrome4.png)
+![Screenshot](https://raw.githubusercontent.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension/master/images/screenshots/chrome3.png)
 See also the [SAP Community Blog](https://blogs.sap.com/2020/03/05/cpi-chrome-plugin-to-enhance-sap-cloud-platform-integration-usability/#)
 ## Contributing
 See [Contribution guidelines for this project](docs/CONTRIBUTING.md) if you want to take part in this project. As I am a beginner myself, beginners are welcome.
