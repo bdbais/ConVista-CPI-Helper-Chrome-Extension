@@ -326,6 +326,7 @@ function getIflowInfo(callback) {
   });
 }
 
+//opens the popup that is triggered bei the info button
 function openIflowInfoPopup() {
   //create iflowInfo div element
   var x = document.getElementById("iflowInfo");
@@ -340,7 +341,9 @@ function openIflowInfoPopup() {
   var deployedOn = cpiData?.flowData?.artifactInformation?.deployedOn;
   if (deployedOn) {
     let date = new Date(deployedOn);
-    deployedOn = date.toLocaleDateString() + " " + date.toLocaleTimeString();
+    //handle time zone differences
+    date.setTime(date.getTime() - date.getTimezoneOffset() * 60 * 1000);
+    deployedOn = date.toLocaleString();
   }
 
   var textElement = `
@@ -638,6 +641,7 @@ function handleUrlChange() {
   }
 }
 
+//Visited IFlows are stored to show in the popup that appears when pressing the button in browser bar
 function storeVisitedIflowsForPopup() {
   var host = document.location.href.split("/")[2].split(".")[0];
   var name = 'visitedIflows_' + host;
@@ -648,16 +652,17 @@ function storeVisitedIflowsForPopup() {
       visitedIflows = [];
     }
 
-
-
+    //filter out the current flow
     if (visitedIflows.length > 0) {
       visitedIflows = visitedIflows.filter((element) => {
         return element.name != cpiData.integrationFlowId;
       });
     }
 
+    //put the current flow to the last element. last position indicates last visited element
     visitedIflows.push({ name: cpiData.integrationFlowId, "url": document.location.href, "favorit": false });
 
+    //delete the first one when there are more than 10 iflows in visited list
     if (visitedIflows.length > 10) {
       visitedIflows.shift();
     }
@@ -666,7 +671,6 @@ function storeVisitedIflowsForPopup() {
     obj[name] = visitedIflows;
 
     chrome.storage.sync.set(obj, function () {
-      console.log("iflow saved");
     });
 
   });
@@ -860,9 +864,8 @@ function initIflowPage() {
   
   /* The Close Button */
   #modal_close {
-    color: #aaaaaa;
     float: right;
-    font-size: 28px;
+    font-size: 1.2rem;
     font-weight: bold;
   }
   
