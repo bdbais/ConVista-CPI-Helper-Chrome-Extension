@@ -47,7 +47,7 @@ You need Google Chrome to install this plugin. I tested it with version 80. I as
 There are two options to install this plugin:
 ### Install directly from Chrome Web Store (recommended)
 Just add the plugin in the [Chrome Web Store](https://chrome.google.com/webstore/detail/convista-sap-cpi-helper/eaddejljhdjeddibkomjfonojmcegkna).
-This is probably the easiest way. 
+This is probably the easiest way. Updates will be installed automatically.
 ### Install in developer mode from sources
 If you know what you are doing, you can install the plugin directly from sources.
 Clone the repo and add the folder directly to Google Chrome
@@ -57,6 +57,8 @@ Clone the repo and add the folder directly to Google Chrome
 >- Click: "Load Unpacked Extension" and select the folder with the plugin data
 
 ## Update
+Chrome updates extensions that are installed from the Chrome Web Store automatically. 
+If you installed the plugin from sources:
 Please replace the folder with the new version on your disk. After that you must delete and add the plugin in Chrome Browser.
 If you have cloned the repository, pull new data. Than delete and add the plugin in Chrome. Restart Chrome.
 
