@@ -114,16 +114,16 @@ function checkUpdate() {
     var html = "<span>You are running version " + manifestVersion + "</span>";
     cpihelper_version.innerHTML = html;
 
-    makeCallPromise("GET", "https://raw.githubusercontent.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension/master/manifest.json").then((response) => {
-        var serverVersion = JSON.parse(response).version;
-        var manifestVersion = chrome.runtime.getManifest().version;
-        var html = "<span>You are running version " + manifestVersion + "</span>";
-        if (serverVersion != manifestVersion) {
-            html += "<br><span style=\"color: red;\">Please update to version " + serverVersion + "</span>";
-        }
-        var cpihelper_version = document.getElementById("cpihelper_version");
-        cpihelper_version.innerHTML = html;
-    }).catch(console.log);
+    /*    makeCallPromise("GET", "https://raw.githubusercontent.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension/master/manifest.json").then((response) => {
+            var serverVersion = JSON.parse(response).version;
+            var manifestVersion = chrome.runtime.getManifest().version;
+            var html = "<span>You are running version " + manifestVersion + "</span>";
+            if (serverVersion != manifestVersion) {
+                html += "<br><span style=\"color: red;\">Please update to version " + serverVersion + "</span>";
+            }
+            var cpihelper_version = document.getElementById("cpihelper_version");
+            cpihelper_version.innerHTML = html;
+        }).catch(console.log); */
 }
 
 async function main() {

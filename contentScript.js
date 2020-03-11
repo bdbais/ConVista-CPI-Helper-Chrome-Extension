@@ -175,7 +175,7 @@ function getLogs() {
             }
             listItem.style["color"] = statusColor;
 
-            let timeButton = createElementFromHTML("<span class='" + resp[i].MessageGuid + "' style='color: " + statusColor + "' " + flash + "' > " + date.substr(11, 8) + "</span >");
+            let timeButton = createElementFromHTML("<span class='" + resp[i].MessageGuid + "' style='cursor: pointer; color: " + statusColor + ";' " + flash + "' > " + date.substr(11, 8) + "</span >");
 
             timeButton.onmouseover = (e) => {
               e.target.style.backgroundColor = '#f0f0f0';
@@ -730,6 +730,11 @@ function initIflowPage() {
 
   //inject needed css for sidebar
   cssStyle = `
+
+      button
+      {
+        cursor: pointer;
+      }
 
       #cpiHelper_sidebar_popup
       {
