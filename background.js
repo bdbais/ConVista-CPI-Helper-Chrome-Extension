@@ -22,11 +22,15 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
     for (var i = 0; i < details.requestHeaders.length; ++i) {
       if (details.requestHeaders[i].name == "X-CSRF-Token") {
         var xcsrftoken = details.requestHeaders[i].value;
-        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-          //send token to contentPage
-          chrome.tabs.sendMessage(tabs[0].id, { cpiData: { xcsrftoken: xcsrftoken } }, function (response) {
-            console.log("xcsrf token is send to contentPage");
-          });
+        var tenant = details.url.split("/")[2].split(".")[0];
+
+        //xcsrf token will be saved in a local object with name xcsrf_<tenant>
+        var name = 'xcsrf_' + tenant;
+        var obj = {};
+        obj[name] = xcsrftoken;
+
+        chrome.storage.local.set(obj, function () {
+          console.log("xcsrf token saved");
         });
         break;
       }

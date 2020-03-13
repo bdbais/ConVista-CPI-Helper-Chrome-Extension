@@ -8,14 +8,6 @@ var cpiData = {};
 cpiData.lastMessageHashList = [];
 cpiData.integrationFlowId = "";
 
-//We need to get the X-CSRF Token to set the log level to trace. This comes from a background service and is received here
-chrome.runtime.onMessage.addListener(
-  function (request, sender, sendResponse) {
-    if (request.cpiData) {
-      cpiData = { ...cpiData, ...request.cpiData }
-    }
-  });
-
 var callCache = new Map();
 function makeCallPromise(method, url, useCache, accept) {
   return new Promise(function (resolve, reject) {
@@ -61,7 +53,7 @@ function makeCallPromise(method, url, useCache, accept) {
 }
 
 //function to make http calls
-function makeCall(type, url, includeXcsrf, payload, callback, contentType) {
+async function makeCall(type, url, includeXcsrf, payload, callback, contentType) {
 
   var xhr = new XMLHttpRequest();
   xhr.withCredentials = true;
@@ -72,7 +64,10 @@ function makeCall(type, url, includeXcsrf, payload, callback, contentType) {
   }
 
   if (includeXcsrf) {
-    xhr.setRequestHeader("X-CSRF-Token", cpiData.xcsrftoken);
+    var tenant = document.location.href.split("/")[2].split(".")[0];
+    var name = 'xcsrf_' + tenant;
+    var xcsrf = await storageGetPromise(name)
+    xhr.setRequestHeader("X-CSRF-Token", xcsrf);
   }
 
   xhr.onreadystatechange = function () {
@@ -643,10 +638,18 @@ function handleUrlChange() {
   }
 }
 
+async function storageGetPromise(name) {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.get([name], function (result) {
+      resolve(result[name]);
+    });
+  })
+}
+
 //Visited IFlows are stored to show in the popup that appears when pressing the button in browser bar
 function storeVisitedIflowsForPopup() {
-  var host = document.location.href.split("/")[2].split(".")[0];
-  var name = 'visitedIflows_' + host;
+  var tenant = document.location.href.split("/")[2].split(".")[0];
+  var name = 'visitedIflows_' + tenant;
   chrome.storage.sync.get([name], function (result) {
     var visitedIflows = result[name];
 

@@ -9,8 +9,7 @@
     "declarativeContent",
     "storage",
     "https://*.hana.ondemand.com/itspaces",
-    "webRequest",
-    "tabs"
+    "webRequest"
   ],
   "background": {
     "scripts": [
