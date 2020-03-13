@@ -19,6 +19,8 @@ Many thanks to ConVista Consulting AG in Cologne, Germany. They supported this i
 - Last visited iflows in browser-bar-popup
 
 ## Changelog
+### 0.5.6
+- [Improvement] Improved xcsrf token exchange
 ### 0.5.5
 - [Bugfix] Hopefully fixed not working trace in some cases
 ### 0.5.3
