@@ -110,6 +110,7 @@ function getLogs() {
   }
 
   //get the messagelogs for current iflow
+  var activeInlineItem;
   makeCall("GET", "/itspaces/odata/api/v1/MessageProcessingLogs?$filter=IntegrationFlowName eq '" + iflowId + "'&$top=10&$format=json&$orderby=LogStart desc", false, "", (xhr) => {
 
     if (xhr.readyState == 4) {
@@ -183,6 +184,24 @@ function getLogs() {
               infoPopupSetTimeout(2000);
             };
 
+            timeButton.onmouseup = (e) => {
+              if (activeInlineItem == e.target.className) {
+                hideInlineTrace();
+                showSnackbar("Inline Debugging Deactivated");
+                activeInlineItem = e.target.className;
+              } else {
+                hideInlineTrace();
+                showInlineTrace(e.target.className);
+                showSnackbar("Inline Debugging Activated");
+                e.target.classList.add("cpiHelper_inlineInfo-active");
+                activeInlineItem = e.target.className;
+              }
+
+
+              e.target.style.backgroundColor = 'red';
+
+            };
+
 
             listItem.appendChild(timeButton);
             listItem.appendChild(infoButton);
@@ -212,6 +231,219 @@ function getLogs() {
       }
     }
   });
+}
+
+async function clickTrace(e) {
+  //create traceInfo div element
+  var x = document.getElementById("traceInfo");
+  if (!x) {
+    x = document.createElement('div');
+    x.id = "traceInfo";
+    document.body.appendChild(x);
+  }
+  x.style.display = "block";
+  x.innerHTML = "";
+
+  var textElement = `
+  <div id="traceInfo_outerFrame">
+  <div id="traceInfo_contentheader">ConVista CPI Helper<span id="traceInfo_close">X</div>
+    <div id="traceInfo_content">
+    Please Wait...
+  </div> 
+  </div>
+  `;
+
+  x.appendChild(createElementFromHTML(textElement));
+  var span = document.getElementById("traceInfo_close");
+  span.onclick = (element) => {
+    var x = document.getElementById("traceInfo");
+    x.style.display = "none";
+  };
+
+  //Trace
+  //https://p0349-tmn.hci.eu1.hana.ondemand.com/itspaces/odata/api/v1/TraceMessages(7875L)/$value
+
+  //Properties
+  //https://p0349-tmn.hci.eu1.hana.ondemand.com/itspaces/odata/api/v1/TraceMessages(7875L)/ExchangeProperties?$format=json
+
+  //Headers
+  //https://p0349-tmn.hci.eu1.hana.ondemand.com/itspaces/odata/api/v1/TraceMessages(7875L)/Properties?$format=json
+
+  //TraceID
+  //https://p0349-tmn.hci.eu1.hana.ondemand.com/itspaces/odata/api/v1/MessageProcessingLogRunSteps(RunId='AF57ga2G45vKDTfn7zqO0zwJ9n93',ChildCount=17)/TraceMessages?$format=json
+
+
+  var childCount = e.target.run.ChildCount;
+  var runId = e.target.run.RunId;
+
+  var traceId = JSON.parse(await makeCallPromise("GET", "/itspaces/odata/api/v1/MessageProcessingLogRunSteps(RunId='" + runId + "',ChildCount=" + childCount + ")/TraceMessages?$format=json", true)).d.results[0].TraceId;
+
+  var properties = JSON.parse(await makeCallPromise("GET", "/itspaces/odata/api/v1/TraceMessages(" + traceId + ")/ExchangeProperties?$format=json", true)).d.results;
+  var headers = JSON.parse(await makeCallPromise("GET", "/itspaces/odata/api/v1/TraceMessages(" + traceId + ")/Properties?$format=json", true)).d.results;
+  var trace = await makeCallPromise("GET", "/itspaces/odata/api/v1/TraceMessages(" + traceId + ")/$value", true);
+
+
+
+  var content = document.getElementById("traceInfo_content");
+
+  content.innerHTML = `
+  
+  <div class="tab">
+  <button id="propertyButton" class="tablinks active">Properties</button>
+  <button id="headerButton" class="tablinks">Headers</button>
+  <button id="traceButton" class="tablinks">Trace</button>
+</div>
+
+<div id="traceInfo_Properties" class="tabcontent active">
+
+</div>
+
+<div id="traceInfo_Headers" class="tabcontent">
+
+</div>
+
+<div id="traceInfo_Trace" class="tabcontent">
+
+</div>
+  
+  `;
+
+  var switchTab = function (event) {
+    var targetName = event.currentTarget.id;
+
+    if (targetName == "propertyButton") {
+      targetName = "traceInfo_Properties";
+    }
+    if (targetName == "headerButton") {
+      targetName = "traceInfo_Headers";
+    }
+    if (targetName == "traceButton") {
+      targetName = "traceInfo_Trace";
+    }
+
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+      tabcontent[i].classList.remove("active");
+    }
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+      tablinks[i].classList.remove("active");
+    }
+    document.getElementById(targetName).classList.add("active");
+    event.currentTarget.classList.add("active");
+  }
+
+  var propertyButton = document.getElementById("propertyButton");
+  propertyButton.addEventListener("click", switchTab);
+  var headerButton = document.getElementById("headerButton");
+  headerButton.addEventListener("click", switchTab);
+  var traceButton = document.getElementById("traceButton");
+  traceButton.addEventListener("click", switchTab);
+
+  var propertyHTML = document.getElementById("traceInfo_Properties");
+  var headerHTML = document.getElementById("traceInfo_Headers");
+  var traceHTML = document.getElementById("traceInfo_Trace");
+
+  var formatHeadersAndPropertiesToTable = function (inputList) {
+    result = "<table><tr><th>Name</th><th>Value</th></tr>"
+    var even = "";
+    inputList.forEach(item => {
+      result += "<tr class=\"" + even + "\"><td>" + item.Name + "</td><td style=\"word-break: break-all;\">" + item.Value + "</td></tr>"
+      if (even == "even") {
+        even = "";
+      } else {
+        even = "even";
+      }
+    });
+    result += "</table>";
+    return result;
+  }
+
+  propertyHTML.innerHTML = formatHeadersAndPropertiesToTable(properties);
+  headerHTML.innerHTML = formatHeadersAndPropertiesToTable(headers);
+  traceHTML.innerText = trace;
+
+}
+
+async function hideInlineTrace() {
+
+  var classesToBedeleted = ["cpiHelper_inlineInfo", "cpiHelper_inlineInfo_error", "cpiHelper_inlineInfo-active"]
+
+  classesToBedeleted.forEach((element) => {
+    let elements = document.getElementsByClassName(element);
+    for (let i = (elements.length - 1); i >= 0; i--) {
+      if (elements[i].onclick) {
+        elements[i].onclick = null;
+        //elements[i].removeEventListener('onclick', clickTrace);
+      }
+      elements[i].classList.remove(element)
+
+    }
+  });
+}
+
+async function showInlineTrace(MessageGuid) {
+
+  var logRuns = await getMessageProcessingLogRuns(MessageGuid);
+
+  logRuns.forEach((run) => {
+    try {
+      let target;
+      let element;
+      //    let target = element.children[getChild(element, ["g"])];
+      //    target = target.children[getChild(target, ["rect", "circle", "path"])];
+
+
+
+      if (/EndEvent/.test(run.StepId)) {
+        element = document.getElementById("BPMNShape_" + run.StepId);
+        target = element.children[0].children[0];
+      }
+
+      if (/CallActivity/.test(run.StepId)) {
+        element = document.getElementById("BPMNShape_" + run.StepId);
+        target = element.children[getChild(element, ["g"])].children[0];
+      }
+
+      if (/MessageFlow_\d+/.test(run.ModelStepId) && /#/.test(run.ModelStepId) != true) {
+        element = document.getElementById("BPMNEdge_" + run.ModelStepId);
+        target = element.children[getChild(element, ["path"])];
+      }
+
+      if (/ExclusiveGateway/.test(run.ModelStepId)) {
+        element = document.getElementById("BPMNShape_" + run.ModelStepId);
+        target = element.children[getChild(element, ["g"])].children[0];
+      }
+
+      target.classList.add("cpiHelper_inlineInfo");
+      //     target.addEventListener("onclick", function abc(event) { clickTrace(event); });
+      target.onclick = clickTrace;
+      target.run = run;
+
+      if (run.Error) {
+        target.classList.add("cpiHelper_inlineInfo_error");
+      }
+      //  console.log("element found for " + run.StepId)
+
+    } catch (e) {
+      console.log("no element found for " + run.StepId);
+      console.log(run);
+    }
+
+  })
+
+}
+
+function getChild(node, childNames) {
+  let index;
+  for (var i = 0; i < node.children.length; i++) {
+    if (childNames.indexOf(node.children[i].localName) > -1) {
+      return i;
+    }
+
+  }
+  return null;
 }
 
 //makes a http call to set the log level to trace
@@ -489,16 +721,7 @@ function infoPopupOpen(MessageGuid) {
   x.className = "show";
 
   ///MessageProcessingLogRuns('AF5eUbNwAc1SeL_vdh09y4njOvwO')/RunSteps?$inlinecount=allpages&$format=json&$top=500
-  makeCallPromise("GET", "/itspaces/odata/api/v1/MessageProcessingLogs('" + MessageGuid + "')/Runs?$inlinecount=allpages&$format=json&$top=500", true).then((responseText) => {
-    var resp = JSON.parse(responseText);
-    console.log(resp);
-    return resp.d.results[0].Id;
-  }).then((runId) => {
-
-    return makeCallPromise("GET", "/itspaces/odata/api/v1/MessageProcessingLogRuns('" + runId + "')/RunSteps?$inlinecount=allpages&$format=json&$top=500", true)
-  }).then((responseText) => {
-    var resp = JSON.parse(responseText).d.results;
-    console.log(resp);
+  getMessageProcessingLogRuns(MessageGuid).then((resp) => {
 
     var y = document.getElementById("cpiHelper_sidebar_popup");
     y.innerText = "";
@@ -507,10 +730,7 @@ function infoPopupOpen(MessageGuid) {
     for (var i = 0; i < resp.length; i++) {
       if (resp[i].Error) {
         error = true;
-        let errorText = document.createElement("div");
-        errorText.innerText = resp[i].Error;
-        errorText.style.color = "red";
-        errorText.className = "contentText";
+        let errorText = createErrorMessageElement(resp[i].Error);
         y.appendChild(errorText);
       }
     }
@@ -524,6 +744,42 @@ function infoPopupOpen(MessageGuid) {
     showSnackbar(JSON.stringify(error));
   });
 };
+
+function lookupError(message) {
+  if (/unable to find valid certification path to requested target/.test(message)) {
+    return "Probably you did not add a certificate for the https host that you are caling to the keystore";
+  }
+
+  return null;
+}
+
+function createErrorMessageElement(message) {
+  let errorElement = document.createElement("div");
+  errorElement.style.color = "red";
+  errorElement.className = "contentText";
+  errorElement.innerText = message;
+
+  let errorContainer = document.createElement("div");
+  errorContainer.appendChild(errorElement);
+
+  let explain = lookupError(message);
+  if (explain) {
+    errorContainer.appendChild(createElementFromHTML("<div>Possible explanation: " + explain + "</div>"));
+  }
+  return errorContainer;
+}
+
+async function getMessageProcessingLogRuns(MessageGuid) {
+  return makeCallPromise("GET", "/itspaces/odata/api/v1/MessageProcessingLogs('" + MessageGuid + "')/Runs?$inlinecount=allpages&$format=json&$top=500", true).then((responseText) => {
+    var resp = JSON.parse(responseText);
+    console.log(resp);
+    return resp.d.results[0].Id;
+  }).then((runId) => {
+    return makeCallPromise("GET", "/itspaces/odata/api/v1/MessageProcessingLogRuns('" + runId + "')/RunSteps?$inlinecount=allpages&$format=json&$top=500", true);
+  }).then((response) => {
+    return JSON.parse(response).d.results;
+  });
+}
 
 var timeOutTimer;
 function infoPopupSetTimeout(milliseconds) {
@@ -888,6 +1144,152 @@ function initIflowPage() {
   `;
 
   injectCss(cssStyle);
+
+  injectCss(cssStyle);
+
+  //infoPopup
+  cssStyle = `
+  /* Modal Content */
+
+  .cpiHelper_inlineInfo {
+    fill:green !important;
+    stroke: green !important;
+  }
+
+  .cpiHelper_inlineInfo.cpiHelper_inlineInfo_error {
+    fill:red !important;
+    stroke:red !important;
+  }
+
+
+  #traceInfo {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 800; /* Sit on top */
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    left: 0;
+    top: 0;
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  }
+
+  #traceInfo_outerFrame {
+    background:#fbfbfb;
+    margin: auto;
+    margin-top: 100px;
+      width: 80%;
+    min-height: 1rem;
+  }
+  #traceInfo_content {
+    border: solid 1px #e1e1e1;
+    padding: 13px;
+   
+  }
+  #traceInfo_contentheader {
+    padding: 10px;
+  
+    z-index: 10;
+    background-color: #009fe3;
+    color: #fff;
+  }
+
+  /* The Close Button */
+  #traceInfo_close {
+    float: right;
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+  
+  #traceInfo_close:hover,
+  #traceInfo_close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  /* Style the tab */
+.tab {
+  overflow: hidden;
+  border: 1px solid #ccc;
+  background-color: #f1f1f1;
+}
+
+/* Style the buttons inside the tab */
+.tab button {
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+  font-size: 17px;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+  background-color: #ccc;
+}
+
+.tabcontent.active {
+  display: block;
+}
+
+/* Style the tab content */
+.tabcontent {
+  display: none;
+  overflow: hidden
+  border: 1px solid #ccc;
+  border-top: none;
+}
+
+table {
+  background:#eaebec;
+  table-layout:fixed;
+	border:#ccc 0px solid;
+}
+
+table th {
+  text-align: left;
+	padding:2px;
+	border-top:0px solid #ccc;
+	border-bottom:0px solid #ccc;
+	background: #f1f1f1;
+}
+table tr {
+	padding-left:5px;
+}
+table td:first-child {
+	text-align: left;
+	padding-left:5px;
+	border-left: 0;
+}
+table td {
+	padding:4px;
+	border-top: 0px solid #ffffff;
+	border-bottom:0px solid #e0e0e0;
+	border-left: 0px solid #e0e0e0;
+
+	background: #f1f1f1;
+}
+table tr.even td {
+	background: #e8e8e8;
+
+}
+table tr:hover td {
+
+}
+  `;
+
+  injectCss(cssStyle);
+
 }
 
 //start
