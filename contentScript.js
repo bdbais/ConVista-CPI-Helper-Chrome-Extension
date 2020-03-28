@@ -101,7 +101,8 @@ function openInfo(url) {
 
 //refresh the logs in message window
 var getLogsTimer;
-function getLogs() {
+var activeInlineItem;
+async function getLogs() {
 
   //check if iflowid exists
   iflowId = cpiData.integrationFlowId;
@@ -110,7 +111,6 @@ function getLogs() {
   }
 
   //get the messagelogs for current iflow
-  var activeInlineItem;
   makeCall("GET", "/itspaces/odata/api/v1/MessageProcessingLogs?$filter=IntegrationFlowName eq '" + iflowId + "'&$top=10&$format=json&$orderby=LogStart desc", false, "", (xhr) => {
 
     if (xhr.readyState == 4) {
@@ -118,11 +118,11 @@ function getLogs() {
       var resp = JSON.parse(xhr.responseText);
       resp = resp.d.results;
 
-      document.getElementById('iflowName').innerText = cpiData.integrationFlowId;
+      //    document.getElementById('iflowName').innerText = cpiData.integrationFlowId;
 
       let updatedText = document.getElementById('updatedText');
 
-      updatedText.textContent = "Last update: " + new Date().toLocaleString("de-DE");
+      updatedText.innerHTML = "<span>Last update:<br>" + new Date().toLocaleString("de-DE") + "</span>";
 
       let thisMessageHash = "";
       if (resp.length != 0) {
@@ -184,17 +184,23 @@ function getLogs() {
               infoPopupSetTimeout(2000);
             };
 
-            timeButton.onmouseup = (e) => {
+            timeButton.onmouseup = async (e) => {
               if (activeInlineItem == e.target.className) {
                 hideInlineTrace();
                 showSnackbar("Inline Debugging Deactivated");
-                activeInlineItem = e.target.className;
+                activeInlineItem = null;
               } else {
                 hideInlineTrace();
-                showInlineTrace(e.target.className);
-                showSnackbar("Inline Debugging Activated");
-                e.target.classList.add("cpiHelper_inlineInfo-active");
-                activeInlineItem = e.target.className;
+                var inlineTrace = await showInlineTrace(e.target.className);
+                if (inlineTrace) {
+                  showSnackbar("Inline Debugging Activated");
+                  e.target.classList.add("cpiHelper_inlineInfo-active");
+                  activeInlineItem = e.target.className;
+                } else {
+                  activeInlineItem = null;
+                  showSnackbar("Inline Debugging not Possible. No data found.");
+                }
+
               }
 
 
@@ -233,32 +239,68 @@ function getLogs() {
   });
 }
 
-async function clickTrace(e) {
+async function showBigPopup(content) {
   //create traceInfo div element
-  var x = document.getElementById("traceInfo");
+  var x = document.getElementById("cpiHelper_bigPopup");
   if (!x) {
     x = document.createElement('div');
-    x.id = "traceInfo";
+    x.id = "cpiHelper_bigPopup";
     document.body.appendChild(x);
   }
   x.style.display = "block";
   x.innerHTML = "";
 
   var textElement = `
-  <div id="traceInfo_outerFrame">
-  <div id="traceInfo_contentheader">ConVista CPI Helper<span id="traceInfo_close">X</div>
-    <div id="traceInfo_content">
-    Please Wait...
-  </div> 
-  </div>
-  `;
+   <div id="cpiHelper_bigPopup_outerFrame">
+   <div id="cpiHelper_bigPopup_contentheader">ConVista CPI Helper<span id="cpiHelper_bigPopup_close">X</div>
+     <div id="cpiHelper_bigPopup_content">
+     Please Wait...
+   </div> 
+   </div>
+   `;
+
+
 
   x.appendChild(createElementFromHTML(textElement));
-  var span = document.getElementById("traceInfo_close");
+  var span = document.getElementById("cpiHelper_bigPopup_close");
   span.onclick = (element) => {
-    var x = document.getElementById("traceInfo");
-    x.style.display = "none";
+    var x = document.getElementById("cpiHelper_bigPopup");
+    x.remove();
   };
+
+  var infocontent = document.getElementById("cpiHelper_bigPopup_content");
+  infocontent.innerHTML = content;
+
+}
+
+async function clickTrace(e) {
+
+  try {
+    var id = this.id.replace(/BPMN[a-zA-Z-]+_/, "");
+
+    var targetElements = inlineTraceElements.filter((element) => {
+      return element.StepId == id || element.ModelStepId == id;
+    })
+
+
+    var childCount = targetElements[0].ChildCount;
+    var runId = targetElements[0].RunId;
+
+
+
+    var traceId = JSON.parse(await makeCallPromise("GET", "/itspaces/odata/api/v1/MessageProcessingLogRunSteps(RunId='" + runId + "',ChildCount=" + childCount + ")/TraceMessages?$format=json", true)).d.results[0].TraceId;
+
+    var properties = JSON.parse(await makeCallPromise("GET", "/itspaces/odata/api/v1/TraceMessages(" + traceId + ")/ExchangeProperties?$format=json", true)).d.results;
+    var headers = JSON.parse(await makeCallPromise("GET", "/itspaces/odata/api/v1/TraceMessages(" + traceId + ")/Properties?$format=json", true)).d.results;
+    var trace = await makeCallPromise("GET", "/itspaces/odata/api/v1/TraceMessages(" + traceId + ")/$value", true);
+
+  } catch (error) {
+    console.log("error catching trace");
+    showSnackbar("No Trace Found.");
+    return;
+  }
+
+
 
   //Trace
   //https://p0349-tmn.hci.eu1.hana.ondemand.com/itspaces/odata/api/v1/TraceMessages(7875L)/$value
@@ -271,79 +313,6 @@ async function clickTrace(e) {
 
   //TraceID
   //https://p0349-tmn.hci.eu1.hana.ondemand.com/itspaces/odata/api/v1/MessageProcessingLogRunSteps(RunId='AF57ga2G45vKDTfn7zqO0zwJ9n93',ChildCount=17)/TraceMessages?$format=json
-
-
-  var childCount = e.target.run.ChildCount;
-  var runId = e.target.run.RunId;
-
-  var traceId = JSON.parse(await makeCallPromise("GET", "/itspaces/odata/api/v1/MessageProcessingLogRunSteps(RunId='" + runId + "',ChildCount=" + childCount + ")/TraceMessages?$format=json", true)).d.results[0].TraceId;
-
-  var properties = JSON.parse(await makeCallPromise("GET", "/itspaces/odata/api/v1/TraceMessages(" + traceId + ")/ExchangeProperties?$format=json", true)).d.results;
-  var headers = JSON.parse(await makeCallPromise("GET", "/itspaces/odata/api/v1/TraceMessages(" + traceId + ")/Properties?$format=json", true)).d.results;
-  var trace = await makeCallPromise("GET", "/itspaces/odata/api/v1/TraceMessages(" + traceId + ")/$value", true);
-
-
-
-  var content = document.getElementById("traceInfo_content");
-
-  content.innerHTML = `
-  
-  <div class="tab">
-  <button id="propertyButton" class="tablinks active">Properties</button>
-  <button id="headerButton" class="tablinks">Headers</button>
-  <button id="traceButton" class="tablinks">Trace</button>
-</div>
-
-<div id="traceInfo_Properties" class="tabcontent active">
-
-</div>
-
-<div id="traceInfo_Headers" class="tabcontent">
-
-</div>
-
-<div id="traceInfo_Trace" class="tabcontent">
-
-</div>
-  
-  `;
-
-  var switchTab = function (event) {
-    var targetName = event.currentTarget.id;
-
-    if (targetName == "propertyButton") {
-      targetName = "traceInfo_Properties";
-    }
-    if (targetName == "headerButton") {
-      targetName = "traceInfo_Headers";
-    }
-    if (targetName == "traceButton") {
-      targetName = "traceInfo_Trace";
-    }
-
-    var i, tabcontent, tablinks;
-    tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-      tabcontent[i].classList.remove("active");
-    }
-    tablinks = document.getElementsByClassName("tablinks");
-    for (i = 0; i < tablinks.length; i++) {
-      tablinks[i].classList.remove("active");
-    }
-    document.getElementById(targetName).classList.add("active");
-    event.currentTarget.classList.add("active");
-  }
-
-  var propertyButton = document.getElementById("propertyButton");
-  propertyButton.addEventListener("click", switchTab);
-  var headerButton = document.getElementById("headerButton");
-  headerButton.addEventListener("click", switchTab);
-  var traceButton = document.getElementById("traceButton");
-  traceButton.addEventListener("click", switchTab);
-
-  var propertyHTML = document.getElementById("traceInfo_Properties");
-  var headerHTML = document.getElementById("traceInfo_Headers");
-  var traceHTML = document.getElementById("traceInfo_Trace");
 
   var formatHeadersAndPropertiesToTable = function (inputList) {
     result = "<table><tr><th>Name</th><th>Value</th></tr>"
@@ -360,15 +329,25 @@ async function clickTrace(e) {
     return result;
   }
 
-  propertyHTML.innerHTML = formatHeadersAndPropertiesToTable(properties);
-  headerHTML.innerHTML = formatHeadersAndPropertiesToTable(headers);
-  traceHTML.innerText = trace;
+  var formatTrace = function (input) {
+    result = "<div>";
+    result += input;
+    result += "</div>";
+    return result;
+  }
+
+
+
+  let names = ["Properties", "Headers", "Trace"];
+  let content = [formatHeadersAndPropertiesToTable(properties), formatHeadersAndPropertiesToTable(headers), formatTrace(trace)];
+
+  showBigPopup(createTabHTML(names, content, "debugtabs", 0));
 
 }
 
 async function hideInlineTrace() {
 
-  var classesToBedeleted = ["cpiHelper_inlineInfo", "cpiHelper_inlineInfo_error", "cpiHelper_inlineInfo-active"]
+  var classesToBedeleted = ["cpiHelper_onclick", "cpiHelper_inlineInfo", "cpiHelper_inlineInfo_error", "cpiHelper_inlineInfo-active"]
 
   classesToBedeleted.forEach((element) => {
     let elements = document.getElementsByClassName(element);
@@ -383,56 +362,131 @@ async function hideInlineTrace() {
   });
 }
 
-async function showInlineTrace(MessageGuid) {
+function createTabHTML(names, content, name, activateTab) {
 
-  var logRuns = await getMessageProcessingLogRuns(MessageGuid);
+  /*
+    {name:"Hallo",
+     content: "",
+     active}
+  }
 
-  logRuns.forEach((run) => {
-    try {
-      let target;
-      let element;
-      //    let target = element.children[getChild(element, ["g"])];
-      //    target = target.children[getChild(target, ["rect", "circle", "path"])];
+  */
+
+  html = `
+  <div class="cpiHelper_tabs">
+  `;
+
+  let checked = 'checked=""';
+  for (let i = 0; i < names.length; i++) {
+
+    if (i == activateTab) {
+      checked = 'checked="checked"';
+    }
+    html += `<input name="tabs" type="radio" id="tab-${name}-${i}" ${checked} class="cpiHelper_tabs_input"/>`;
+    html += `<label for="tab-${name}-${i}" class="cpiHelper_tabs_label">${names[i]}</label>`;
+
+    html += ` <div class="cpiHelper_tabs_panel">
+      ${content[i]}
+    </div>`;
+  }
 
 
 
-      if (/EndEvent/.test(run.StepId)) {
-        element = document.getElementById("BPMNShape_" + run.StepId);
-        target = element.children[0].children[0];
-      }
+  html += "</div>";
 
-      if (/CallActivity/.test(run.StepId)) {
-        element = document.getElementById("BPMNShape_" + run.StepId);
-        target = element.children[getChild(element, ["g"])].children[0];
-      }
+  return html;
 
-      if (/MessageFlow_\d+/.test(run.ModelStepId) && /#/.test(run.ModelStepId) != true) {
-        element = document.getElementById("BPMNEdge_" + run.ModelStepId);
-        target = element.children[getChild(element, ["path"])];
-      }
 
-      if (/ExclusiveGateway/.test(run.ModelStepId)) {
-        element = document.getElementById("BPMNShape_" + run.ModelStepId);
-        target = element.children[getChild(element, ["g"])].children[0];
-      }
+}
 
-      target.classList.add("cpiHelper_inlineInfo");
-      //     target.addEventListener("onclick", function abc(event) { clickTrace(event); });
-      target.onclick = clickTrace;
-      target.run = run;
+var inlineTraceElements;
+async function createInlineTraceElements(MessageGuid) {
+  return new Promise(async (resolve, reject) => {
+    inlineTraceElements = [];
 
-      if (run.Error) {
-        target.classList.add("cpiHelper_inlineInfo_error");
-      }
-      //  console.log("element found for " + run.StepId)
+    var logRuns = await getMessageProcessingLogRuns(MessageGuid);
 
-    } catch (e) {
-      console.log("no element found for " + run.StepId);
-      console.log(run);
+    if (logRuns == null || logRuns.length == 0) {
+      return resolve(0);
     }
 
-  })
+    logRuns.forEach((run) => {
+      inlineTraceElements.push({
+        StepId: run.StepId,
+        ModelStepId: run.ModelStepId,
+        ChildCount: run.ChildCount,
+        RunId: run.RunId
+      });
+    });
 
+    return resolve(logRuns.length);
+  });
+}
+
+
+
+async function showInlineTrace(MessageGuid) {
+  return new Promise(async (resolve, reject) => {
+    var logRuns = await createInlineTraceElements(MessageGuid);
+
+    if (logRuns == null || logRuns.length == 0) {
+      return resolve(null);
+    }
+
+    inlineTraceElements.forEach((run) => {
+      try {
+        let target;
+        let element;
+        //    let target = element.children[getChild(element, ["g"])];
+        //    target = target.children[getChild(target, ["rect", "circle", "path"])];
+
+
+
+        if (/EndEvent/.test(run.StepId)) {
+          element = document.getElementById("BPMNShape_" + run.StepId);
+          target = element.children[0].children[0];
+        }
+
+        if (/CallActivity/.test(run.StepId)) {
+          element = document.getElementById("BPMNShape_" + run.StepId);
+          target = element.children[getChild(element, ["g"])].children[0];
+        }
+
+        if (/MessageFlow_\d+/.test(run.ModelStepId) && /#/.test(run.ModelStepId) != true) {
+          element = document.getElementById("BPMNEdge_" + run.ModelStepId);
+          target = element.children[getChild(element, ["path"])];
+        }
+
+        if (/ExclusiveGateway/.test(run.ModelStepId)) {
+          element = document.getElementById("BPMNShape_" + run.ModelStepId);
+          target = element.children[getChild(element, ["g"])].children[0];
+        }
+
+        if (/ParallelGateway/.test(run.ModelStepId)) {
+          element = document.getElementById("BPMNShape_" + run.ModelStepId);
+          target = element.children[getChild(element, ["g"])].children[0];
+        }
+
+        target.classList.add("cpiHelper_inlineInfo");
+        //     target.addEventListener("onclick", function abc(event) { clickTrace(event); });
+        element.classList.add("cpiHelper_onclick");
+        element.onclick = clickTrace;
+
+
+        if (run.Error) {
+          target.classList.add("cpiHelper_inlineInfo_error");
+        }
+        //  console.log("element found for " + run.StepId)
+
+      } catch (e) {
+        console.log("no element found for " + run.StepId);
+        console.log(run);
+      }
+
+      return resolve(true);
+
+    })
+  })
 }
 
 function getChild(node, childNames) {
@@ -703,7 +757,7 @@ function injectCss(cssStyle) {
   document.getElementsByTagName('head')[0].appendChild(style);
 }
 
-function infoPopupOpen(MessageGuid) {
+async function infoPopupOpen(MessageGuid) {
   var x = document.getElementById("cpiHelper_sidebar_popup");
   if (!x) {
     x = document.createElement('div');
@@ -721,28 +775,33 @@ function infoPopupOpen(MessageGuid) {
   x.className = "show";
 
   ///MessageProcessingLogRuns('AF5eUbNwAc1SeL_vdh09y4njOvwO')/RunSteps?$inlinecount=allpages&$format=json&$top=500
-  getMessageProcessingLogRuns(MessageGuid).then((resp) => {
+  var resp = await getMessageProcessingLogRuns(MessageGuid)
 
-    var y = document.getElementById("cpiHelper_sidebar_popup");
-    y.innerText = "";
+  var y = document.getElementById("cpiHelper_sidebar_popup");
+  y.innerText = "";
 
-    let error = false;
-    for (var i = 0; i < resp.length; i++) {
-      if (resp[i].Error) {
-        error = true;
-        let errorText = createErrorMessageElement(resp[i].Error);
-        y.appendChild(errorText);
-      }
-    }
-    if (!error || resp.length == 0) {
-      let errorText = document.createElement("span");
-      errorText.className = "contentText";
+
+  if (resp == null || resp.length == 0) {
+    y.innerText = "No data available.";
+    return;
+  }
+
+
+  let error = false;
+  for (var i = 0; i < resp.length; i++) {
+    if (resp[i].Error) {
+      error = true;
+      let errorText = createErrorMessageElement(resp[i].Error);
       y.appendChild(errorText);
-      y.innerText = "No errors found in processed message";
     }
-  }).catch((error) => {
-    showSnackbar(JSON.stringify(error));
-  });
+  }
+  if (!error || resp.length == 0) {
+    let errorText = document.createElement("span");
+    errorText.className = "contentText";
+    y.appendChild(errorText);
+    y.innerText = "No errors found in processed message";
+  }
+
 };
 
 function lookupError(message) {
@@ -778,6 +837,9 @@ async function getMessageProcessingLogRuns(MessageGuid) {
     return makeCallPromise("GET", "/itspaces/odata/api/v1/MessageProcessingLogRuns('" + runId + "')/RunSteps?$inlinecount=allpages&$format=json&$top=500", true);
   }).then((response) => {
     return JSON.parse(response).d.results;
+  }).catch((e) => {
+    console.log(e);
+    return null;
   });
 }
 
@@ -953,7 +1015,7 @@ function initIflowPage() {
       border-radius: 2px;
       padding: 16px;
       position: fixed;
-      z-index: 1;
+      z-index: 500;
       left: 50%;
       bottom: 30px;
       font-size: 17px;
@@ -1000,7 +1062,7 @@ function initIflowPage() {
       #cpiHelper_sidebar_popup
       {
         position:fixed;
-        z-index:900;
+        z-index:460;
         background:#fbfbfb;
         bottom:50px;
         right:100px;
@@ -1039,7 +1101,7 @@ function initIflowPage() {
         background:#fbfbfb;
         top:100px;
         right:0px;
-        width:275px;
+        width:220px;
         opacity: 0.9;
       }   
   
@@ -1097,7 +1159,7 @@ function initIflowPage() {
   #iflowInfo {
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
-    z-index: 800; /* Sit on top */
+    z-index: 400; /* Sit on top */
     width: 100%; /* Full width */
     height: 100%; /* Full height */
     left: 0;
@@ -1147,25 +1209,25 @@ function initIflowPage() {
 
   injectCss(cssStyle);
 
-  //infoPopup
+
   cssStyle = `
   /* Modal Content */
 
   .cpiHelper_inlineInfo {
-    fill:green !important;
-    stroke: green !important;
+    fill:#a2ffa2 !important;
+    stroke:#00ff00 !important;
   }
 
   .cpiHelper_inlineInfo.cpiHelper_inlineInfo_error {
-    fill:red !important;
-    stroke:red !important;
+    fill:#ff6b6b !important;
+    stroke:#ff6b6b !important;
   }
 
 
-  #traceInfo {
+  #cpiHelper_bigPopup {
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
-    z-index: 800; /* Sit on top */
+    z-index: 450; /* Sit on top */
     width: 100%; /* Full width */
     height: 100%; /* Full height */
     left: 0;
@@ -1175,19 +1237,18 @@ function initIflowPage() {
     background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
   }
 
-  #traceInfo_outerFrame {
+  #cpiHelper_bigPopup_outerFrame {
     background:#fbfbfb;
     margin: auto;
     margin-top: 100px;
       width: 80%;
     min-height: 1rem;
   }
-  #traceInfo_content {
+  #cpiHelper_bigPopup_content {
     border: solid 1px #e1e1e1;
-    padding: 13px;
-   
   }
-  #traceInfo_contentheader {
+  
+  #cpiHelper_bigPopup_contentheader {
     padding: 10px;
   
     z-index: 10;
@@ -1196,59 +1257,84 @@ function initIflowPage() {
   }
 
   /* The Close Button */
-  #traceInfo_close {
+  #cpiHelper_bigPopup_close {
     float: right;
     font-size: 1.2rem;
     font-weight: bold;
   }
   
-  #traceInfo_close:hover,
-  #traceInfo_close:focus {
+  #cpiHelper_bigPopup_close:hover,
+  #cpiHelper_bigPopup_close:focus {
     color: #000;
     text-decoration: none;
     cursor: pointer;
   }
 
-  /* Style the tab */
-.tab {
-  overflow: hidden;
-  border: 1px solid #ccc;
-  background-color: #f1f1f1;
-}
+/*tabs  */
 
-/* Style the buttons inside the tab */
-.tab button {
-  background-color: inherit;
-  float: left;
-  border: none;
-  outline: none;
-  cursor: pointer;
-  padding: 14px 16px;
-  transition: 0.3s;
-  font-size: 17px;
-}
+  .cpiHelper_tabs {
+    box-sizing: border-box;
+    display: flex;
+    flex-wrap: wrap;
+    background: #efefef;
+    box-shadow: 0 48px 80px -32px rgba(0,0,0,0.3);
+  }
 
-/* Change background color of buttons on hover */
-.tab button:hover {
-  background-color: #ddd;
-}
+  .cpiHelper_tabs_input {
+    position: absolute;
+    opacity: 0;
+  }
 
-/* Create an active/current tablink class */
-.tab button.active {
-  background-color: #ccc;
-}
+  .cpiHelper_tabs_label {
+    width: 100%;
+    padding: 20px 30px;
+    background: #e5e5e5;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 18px;
+    color: #7f7f7f;
+    transition: background 0.1s, color 0.1s;
+  }
+  
+  .cpiHelper_tabs_label:hover {
+    background: #d8d8d8;
+  }
+  
+  .cpiHelper_tabs_label:active {
+    background: #ccc;
+  }
+  
+  .cpiHelper_tabs_input:focus + .cpiHelper_tabs_label {
+    box-shadow: inset 0px 0px 0px 3px #2aa1c0;
+    z-index: 1;
+  }
 
-.tabcontent.active {
-  display: block;
-}
+  .cpiHelper_tabs_input:checked + .cpiHelper_tabs_label {
+    background: #fff;
+    color: #000;
+  }
+  
+  @media (min-width: 600px) {
+    .cpiHelper_tabs_label {
+      width: auto;
+    }
+  }
 
-/* Style the tab content */
-.tabcontent {
-  display: none;
-  overflow: hidden
-  border: 1px solid #ccc;
-  border-top: none;
-}
+  .cpiHelper_tabs_panel {
+    display: none;
+    padding: 20px 30px 30px;
+    background: #fff;
+  }
+  
+  @media (min-width: 600px) {
+    .cpiHelper_tabs_panel {
+      order: 99;
+    }
+  }
+  
+  .cpiHelper_tabs_input:checked + .cpiHelper_tabs_label + .cpiHelper_tabs_panel {
+    display: block;
+  }
 
 table {
   background:#eaebec;
