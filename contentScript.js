@@ -239,7 +239,7 @@ async function getLogs() {
   });
 }
 
-async function showBigPopup(content) {
+async function showBigPopup(content, header) {
   //create traceInfo div element
   var x = document.getElementById("cpiHelper_bigPopup");
   if (!x) {
@@ -250,9 +250,15 @@ async function showBigPopup(content) {
   x.style.display = "block";
   x.innerHTML = "";
 
+  if (header) {
+    header = "- " + header;
+  } else {
+    header = "";
+  }
+
   var textElement = `
    <div id="cpiHelper_bigPopup_outerFrame">
-   <div id="cpiHelper_bigPopup_contentheader">ConVista CPI Helper<span id="cpiHelper_bigPopup_close">X</div>
+   <div id="cpiHelper_bigPopup_contentheader">ConVista CPI Helper ${header}<span id="cpiHelper_bigPopup_close">X</div>
      <div id="cpiHelper_bigPopup_content">
      Please Wait...
    </div> 
@@ -269,52 +275,23 @@ async function showBigPopup(content) {
   };
 
   var infocontent = document.getElementById("cpiHelper_bigPopup_content");
-  infocontent.innerHTML = content;
+  if (typeof (content) == "string") {
+    infocontent.innerHTML = content;
+  }
 
+  if (typeof (content) == "object") {
+    infocontent.innerHTML = "";
+    infocontent.appendChild(content);
+  }
 }
 
 async function clickTrace(e) {
 
-  try {
-    var id = this.id.replace(/BPMN[a-zA-Z-]+_/, "");
-
-    var targetElements = inlineTraceElements.filter((element) => {
-      return element.StepId == id || element.ModelStepId == id;
-    })
-
-
-    var childCount = targetElements[0].ChildCount;
-    var runId = targetElements[0].RunId;
-
-
-
-    var traceId = JSON.parse(await makeCallPromise("GET", "/itspaces/odata/api/v1/MessageProcessingLogRunSteps(RunId='" + runId + "',ChildCount=" + childCount + ")/TraceMessages?$format=json", true)).d.results[0].TraceId;
-
-    var properties = JSON.parse(await makeCallPromise("GET", "/itspaces/odata/api/v1/TraceMessages(" + traceId + ")/ExchangeProperties?$format=json", true)).d.results;
-    var headers = JSON.parse(await makeCallPromise("GET", "/itspaces/odata/api/v1/TraceMessages(" + traceId + ")/Properties?$format=json", true)).d.results;
-    var trace = await makeCallPromise("GET", "/itspaces/odata/api/v1/TraceMessages(" + traceId + ")/$value", true);
-
-  } catch (error) {
-    console.log("error catching trace");
-    showSnackbar("No Trace Found.");
-    return;
-  }
-
-
-
-  //Trace
-  //https://p0349-tmn.hci.eu1.hana.ondemand.com/itspaces/odata/api/v1/TraceMessages(7875L)/$value
-
-  //Properties
-  //https://p0349-tmn.hci.eu1.hana.ondemand.com/itspaces/odata/api/v1/TraceMessages(7875L)/ExchangeProperties?$format=json
-
-  //Headers
-  //https://p0349-tmn.hci.eu1.hana.ondemand.com/itspaces/odata/api/v1/TraceMessages(7875L)/Properties?$format=json
-
-  //TraceID
-  //https://p0349-tmn.hci.eu1.hana.ondemand.com/itspaces/odata/api/v1/MessageProcessingLogRunSteps(RunId='AF57ga2G45vKDTfn7zqO0zwJ9n93',ChildCount=17)/TraceMessages?$format=json
-
   var formatHeadersAndPropertiesToTable = function (inputList) {
+    if (inputList == null || inputList.length == 0) {
+      return "<div>No elements found</div>";
+    }
+
     result = "<table><tr><th>Name</th><th>Value</th></tr>"
     var even = "";
     inputList.forEach(item => {
@@ -328,20 +305,273 @@ async function clickTrace(e) {
     result += "</table>";
     return result;
   }
+  var formatTrace = function (input, id) {
 
-  var formatTrace = function (input) {
-    result = "<div>";
-    result += input;
-    result += "</div>";
+    var encodeHTML = function (str) {
+      var buf = [];
+
+      for (var i = str.length - 1; i >= 0; i--) {
+        buf.unshift(['&#', str[i].charCodeAt(), ';'].join(''));
+      }
+
+      return buf.join('');
+    }
+
+    var formatXml = function (sourceXml) {
+      var xmlDoc = new DOMParser().parseFromString(sourceXml, 'application/xml');
+      var xsltDoc = new DOMParser().parseFromString([
+        // describes how we want to modify the XML - indent everything
+        '<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform">',
+        '  <xsl:strip-space elements="*"/>',
+        '  <xsl:template match="para[content-style][not(text())]">', // change to just text() to strip space in text nodes
+        '    <xsl:value-of select="normalize-space(.)"/>',
+        '  </xsl:template>',
+        '  <xsl:template match="node()|@*">',
+        '    <xsl:copy><xsl:apply-templates select="node()|@*"/></xsl:copy>',
+        '  </xsl:template>',
+        '  <xsl:output indent="yes"/>',
+        '</xsl:stylesheet>',
+      ].join('\n'), 'application/xml');
+
+      var xsltProcessor = new XSLTProcessor();
+      xsltProcessor.importStylesheet(xsltDoc);
+      var resultDoc = xsltProcessor.transformToDocument(xmlDoc);
+      var resultXml = new XMLSerializer().serializeToString(resultDoc);
+      return resultXml;
+    };
+
+    var prettify = function (input) {
+      var stringToFormat;
+      var type;
+
+
+      try {
+        stringToFormat = JSON.stringify(JSON.parse(input), null, 4);
+        type = "json";
+      } catch (error) {
+
+      }
+
+      if (stringToFormat == null) {
+        if (input.trim()[0] == "<") {
+          stringToFormat = formatXml(input);
+          stringToFormat = encodeHTML(stringToFormat);
+          type = "xml";
+        }
+      }
+
+      if (stringToFormat == null) {
+        type = "unknown";
+        stringToFormat = input;
+      }
+
+      PR.prettyPrint();
+      showSnackbar("Autodetect content: " + type);
+      return PR.prettyPrintOne(stringToFormat, null, 1);
+
+    }
+
+
+
+
+    var copyButton = document.createElement("button");
+    copyButton.innerText = "Copy";
+    copyButton.onclick = (input) => {
+
+      var text;
+      //check who is active
+      var unformatted = document.getElementById("cpiHelper_traceText_unformatted_" + id);
+      var formatted = document.getElementById("cpiHelper_traceText_formatted_" + id);
+
+      if (unformatted.classList.contains("cpiHelper_traceText_active")) {
+        text = unformatted.innerText;
+      } else {
+        text = formatted.innerText;
+      }
+
+
+      navigator.clipboard.writeText(text).then(function () {
+        console.log('Async: Copying to clipboard was successful!');
+      }, function (err) {
+        console.error('Async: Could not copy text: ', err);
+      })
+    };
+
+    var beautifyButton = document.createElement("button");
+    beautifyButton.innerText = "Try to Beautify";
+    beautifyButton.onclick = (event) => {
+
+      //check who is active
+      var unformatted = document.getElementById("cpiHelper_traceText_unformatted_" + id);
+      var formatted = document.getElementById("cpiHelper_traceText_formatted_" + id);
+
+      if (unformatted.classList.contains("cpiHelper_traceText_active")) {
+        unformatted.classList.remove("cpiHelper_traceText_active");
+        formatted.classList.add("cpiHelper_traceText_active");
+        this.innerText = "Uglify";
+      } else {
+        formatted.classList.remove("cpiHelper_traceText_active");
+        unformatted.classList.add("cpiHelper_traceText_active");
+        this.innerText = "Try to Beautify";
+      }
+
+      if (formatted.innerHTML == "") {
+        var pre = document.createElement("pre");
+        pre.classList.add("prettyprint");
+        pre.classList.add("linenums");
+        pre.style.border = "none";
+        pre.style.margin = "0px";
+        pre.innerHTML = prettify(unformatted.innerText);
+        formatted.appendChild(pre);
+      }
+
+    }
+
+    var result = document.createElement("div");
+    result.appendChild(beautifyButton);
+    result.appendChild(copyButton);
+
+    var unformattedTrace = document.createElement("div");
+    var formattedTrace = document.createElement("div");
+    formattedTrace.id = "cpiHelper_traceText_formatted_" + id;
+    formattedTrace.classList.add("cpiHelper_traceText");
+
+
+
+    unformattedTrace.classList.add("cpiHelper_traceText");
+    unformattedTrace.classList.add("cpiHelper_traceText_active");
+    unformattedTrace.id = "cpiHelper_traceText_unformatted_" + id;
+    unformattedTrace.innerText = input;
+    result.appendChild(unformattedTrace);
+    result.appendChild(formattedTrace);
     return result;
   }
 
+  var formatLogContent = function (inputList) {
+    result = "<table><tr><th>Name</th><th>Value</th></tr>"
+    var even = "";
+    inputList.forEach(item => {
+      result += "<tr class=\"" + even + "\"><td>" + item.Name + "</td><td style=\"word-break: break-all;\">" + item.Value + "</td></tr>"
+      if (even == "even") {
+        even = "";
+      } else {
+        even = "even";
+      }
+    });
+    result += "</table>";
+    return result;
+  }
+  var getTraceTabContent = async function (object) {
+    var traceId = JSON.parse(await makeCallPromise("GET", "/itspaces/odata/api/v1/MessageProcessingLogRunSteps(RunId='" + object.runId + "',ChildCount=" + object.childCount + ")/TraceMessages?$format=json", true)).d.results[0].TraceId;
+
+    let html = "";
+    if (object.traceType == "properties") {
+      let elements = JSON.parse(await makeCallPromise("GET", "/itspaces/odata/api/v1/TraceMessages(" + traceId + ")/ExchangeProperties?$format=json", true)).d.results;
+      html = formatHeadersAndPropertiesToTable(elements);
+    }
+    if (object.traceType == "headers") {
+      let elements = JSON.parse(await makeCallPromise("GET", "/itspaces/odata/api/v1/TraceMessages(" + traceId + ")/Properties?$format=json", true)).d.results;
+      html = formatHeadersAndPropertiesToTable(elements);
+    }
+
+    if (object.traceType == "trace") {
+      let elements = await makeCallPromise("GET", "/itspaces/odata/api/v1/TraceMessages(" + traceId + ")/$value", true);
+      html = formatTrace(elements, object.runId + "_" + object.childCount);
+    }
+
+    if (object.traceType == "logContent") {
+      let elements = JSON.parse(await makeCallPromise("GET", "/itspaces/odata/api/v1/MessageProcessingLogRunSteps(RunId='" + object.runId + "',ChildCount=" + object.childCount + ")/?$expand=RunStepProperties&$format=json", true)).d.RunStepProperties.results;
+      html = formatLogContent(elements);
+    }
+
+    return html;
+  }
+
+  var id = this.id.replace(/BPMN[a-zA-Z-]+_/, "");
+
+  var targetElements = inlineTraceElements.filter((element) => {
+    return element.StepId == id || element.ModelStepId == id;
+  })
+
+  var runs = [];
+
+  for (var n = targetElements.length - 1; n >= 0; n--) {
+    var childCount = targetElements[n].ChildCount;
+    var runId = targetElements[n].RunId;
+    var branch = targetElements[n].BranchId
+    try {
+
+      var traceId = JSON.parse(await makeCallPromise("GET", "/itspaces/odata/api/v1/MessageProcessingLogRunSteps(RunId='" + runId + "',ChildCount=" + childCount + ")/TraceMessages?$format=json", true)).d.results[0].TraceId;
+
+      var objects = [{
+        label: "Properties",
+        content: getTraceTabContent,
+        active: true,
+        childCount: childCount,
+        runId: runId,
+        traceType: "properties"
+      }, {
+        label: "Headers",
+        content: getTraceTabContent,
+        active: false,
+        childCount: childCount,
+        runId: runId,
+        traceType: "headers"
+      }, {
+        label: "Trace",
+        content: getTraceTabContent,
+        active: false,
+        childCount: childCount,
+        runId: runId,
+        traceType: "trace"
+      }, {
+        label: "Log Content",
+        content: getTraceTabContent,
+        active: false,
+        childCount: childCount,
+        runId: runId,
+        traceType: "logContent"
+      }
+      ]
 
 
-  let names = ["Properties", "Headers", "Trace"];
-  let content = [formatHeadersAndPropertiesToTable(properties), formatHeadersAndPropertiesToTable(headers), formatTrace(trace)];
 
-  showBigPopup(createTabHTML(names, content, "debugtabs", 0));
+      runs.push({
+        label: "Branch " + branch,
+        content: await createTabHTML(objects, "tracetab-" + childCount),
+      });
+
+    } catch (error) {
+      console.log("error catching trace");
+
+    }
+
+
+
+  }
+
+  //Trace
+  //https://p0349-tmn.hci.eu1.hana.ondemand.com/itspaces/odata/api/v1/TraceMessages(7875L)/$value
+
+  //Properties
+  //https://p0349-tmn.hci.eu1.hana.ondemand.com/itspaces/odata/api/v1/TraceMessages(7875L)/ExchangeProperties?$format=json
+
+  //Headers
+  //https://p0349-tmn.hci.eu1.hana.ondemand.com/itspaces/odata/api/v1/TraceMessages(7875L)/Properties?$format=json
+
+  //TraceID
+  //https://p0349-tmn.hci.eu1.hana.ondemand.com/itspaces/odata/api/v1/MessageProcessingLogRunSteps(RunId='AF57ga2G45vKDTfn7zqO0zwJ9n93',ChildCount=17)/TraceMessages?$format=json
+
+  if (runs.length == 0) {
+    showSnackbar("No Trace Found.");
+    return;
+  }
+
+  if (runs.length == 1) {
+    showBigPopup(runs[0].content, "Content Before Step");
+  } else {
+    showBigPopup(await createTabHTML(runs, "runstab", 0), "Content Before Step");
+  }
 
 }
 
@@ -362,40 +592,78 @@ async function hideInlineTrace() {
   });
 }
 
-function createTabHTML(names, content, name, activateTab) {
-
-  /*
-    {name:"Hallo",
-     content: "",
-     active}
-  }
-
-  */
-
-  html = `
-  <div class="cpiHelper_tabs">
-  `;
-
-  let checked = 'checked=""';
-  for (let i = 0; i < names.length; i++) {
-
-    if (i == activateTab) {
-      checked = 'checked="checked"';
+async function createTabHTML(objects, idPart, overwriteActivePosition) {
+  return new Promise(async (resolve, reject) => {
+    /*
+      {label:"Hallo",
+       content: "",
+       active}
     }
-    html += `<input name="tabs" type="radio" id="tab-${name}-${i}" ${checked} class="cpiHelper_tabs_input"/>`;
-    html += `<label for="tab-${name}-${i}" class="cpiHelper_tabs_label">${names[i]}</label>`;
+  
+    */
 
-    html += ` <div class="cpiHelper_tabs_panel">
-      ${content[i]}
-    </div>`;
-  }
+    html = document.createElement("div");
+    html.classList.add("cpiHelper_tabs");
+
+    let checked = 'checked=""';
+    for (let i = 0; i < objects.length; i++) {
+
+      checked = "";
+      if ((overwriteActivePosition != null && overwriteActivePosition == i) || (overwriteActivePosition != null && overwriteActivePosition == objects[i].label) || (overwriteActivePosition == null && objects[i].active)) {
+        checked = 'checked="checked"';
+      }
+
+      //input button
+      let input = createElementFromHTML(`<input name="tabs-${idPart}" type="radio" id="tab-${idPart}-${i}" ${checked} class="cpiHelper_tabs_input"/>`);
+
+      if (typeof (objects[i].content) == "function") {
+        input.onclick = async (event) => {
+
+          let contentElement = document.getElementById(idPart + "-" + i + "-content");
+          if (contentElement.innerHTML == "Please Wait...") {
+            let contentResponse = await objects[i].content(objects[i]);
+            if (typeof (contentResponse) == "object") {
+              contentElement.innerHTML = "";
+
+              contentElement.appendChild(contentResponse);
+            } else {
+              contentElement.innerHTML = await objects[i].content(objects[i]);
 
 
+            }
+          }
+        }
+      }
 
-  html += "</div>";
 
-  return html;
+      //label
+      let label = createElementFromHTML(`<label for="tab-${idPart}-${i}" class="cpiHelper_tabs_label">${objects[i].label}</label>`);
 
+      //content of tab
+      let content = createElementFromHTML(` <div id="${idPart}-${i}-content" class="cpiHelper_tabs_panel"></div>`);
+
+      if (typeof (objects[i].content) == "string") {
+        content.innerHTML = objects[i].content;
+      }
+
+      if (typeof (objects[i].content) == "object") {
+        content.appendChild(objects[i].content);
+      }
+
+      if (typeof (objects[i].content) == "function") {
+        content.innerHTML = "Please Wait...";
+        if (objects[i].active) {
+          content.innerHTML = await objects[i].content(objects[i]);
+        }
+      }
+
+      html.appendChild(input);
+      html.appendChild(label);
+      html.appendChild(content);
+    }
+
+    return resolve(html);
+  });
 
 }
 
@@ -415,7 +683,8 @@ async function createInlineTraceElements(MessageGuid) {
         StepId: run.StepId,
         ModelStepId: run.ModelStepId,
         ChildCount: run.ChildCount,
-        RunId: run.RunId
+        RunId: run.RunId,
+        BranchId: run.BranchId
       });
     });
 
@@ -1097,7 +1366,7 @@ function initIflowPage() {
   
       #cpiHelper_content{
         position:fixed;
-        z-index:700;
+        z-index:400;
         background:#fbfbfb;
         top:100px;
         right:0px;
@@ -1278,6 +1547,11 @@ function initIflowPage() {
     flex-wrap: wrap;
     background: #efefef;
     box-shadow: 0 48px 80px -32px rgba(0,0,0,0.3);
+    padding: 15px;
+  }
+  .cpiHelper_tabs .cpiHelper_tabs_panel .cpiHelper_tabs
+  {
+    padding:0px;
   }
 
   .cpiHelper_tabs_input {
@@ -1287,7 +1561,7 @@ function initIflowPage() {
 
   .cpiHelper_tabs_label {
     width: 100%;
-    padding: 20px 30px;
+    padding: 10px 10px;
     background: #e5e5e5;
     cursor: pointer;
     font-weight: bold;
@@ -1322,7 +1596,8 @@ function initIflowPage() {
 
   .cpiHelper_tabs_panel {
     display: none;
-    padding: 20px 30px 30px;
+    width: 100%;
+ 
     background: #fff;
   }
   
@@ -1372,6 +1647,26 @@ table tr.even td {
 table tr:hover td {
 
 }
+
+.cpiHelper_traceText {
+  white-space: pre-line;
+  word-wrap: break-word;
+  cursor: text;
+  font-family: monospace;
+  font-size: 1.2em;
+  padding: 20px;
+  display: none;
+}
+
+.cpiHelper_traceText.cpiHelper_traceText_active {
+  display:block;
+}
+
+li.L0, li.L1, li.L2, li.L3,
+li.L5, li.L6, li.L7, li.L8 {
+  list-style-type: decimal !important;
+}
+
   `;
 
   injectCss(cssStyle);
