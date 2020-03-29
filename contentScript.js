@@ -156,46 +156,57 @@ async function getLogs() {
             //flash animation for new elements
             let flash = "";
             if (cpiData.lastMessageHashList.length != 0 && !cpiData.lastMessageHashList.includes(thisMessageHashList[i])) {
-              flash = "class='flash'";
+              flash = " flash";
             }
+            let loglevel = resp[i].LogLevel.toLowerCase();
+            // logLevel[0] = logLevel[0].toUpperCase();
 
-            let traceButton = createElementFromHTML("<button id='trace--" + i + "' class='" + resp[i].MessageGuid + "'>" + resp[i].LogLevel + "</button>");
-            let infoButton = createElementFromHTML("<button id='info--" + i + "' class='" + resp[i].AlternateWebLink + "'>Log</button>");
+            let traceButton = createElementFromHTML("<button id='trace--" + i + "' class='" + resp[i].MessageGuid + "'>" + loglevel + "</button>");
+            let infoButton = createElementFromHTML("<button id='info--" + i + "' class='" + resp[i].AlternateWebLink + "'><span data-sap-ui-icon-content='' class='sapUiIcon sapUiIconMirrorInRTL' style='font-family: SAP-icons; font-size: 0.9rem;'></span></button>");
 
             let listItem = document.createElement("div");
+            listItem.classList.add("cpiHelper_messageListItem")
             let statusColor = "#008000";
+            let statusIcon = "";
             if (resp[i].Status == "PROCESSING") {
               statusColor = "#FFC300";
+              statusIcon = "";
             }
             if (resp[i].Status == "FAILED") {
               statusColor = "#C70039";
+              statusIcon = "";
             }
-            listItem.style["color"] = statusColor;
+            //listItem.style["color"] = statusColor;
 
-            let timeButton = createElementFromHTML("<span class='" + resp[i].MessageGuid + "' style='cursor: pointer; color: " + statusColor + ";' " + flash + "' > " + date.substr(11, 8) + "</span >");
+            let inlineTraceButton = createElementFromHTML("<button class='" + resp[i].MessageGuid + flash + " cpiHelper_inlineInfo-button' style='cursor: pointer;'>" + date.substr(11, 8) + "</button>");
 
-            timeButton.onmouseover = (e) => {
-              e.target.style.backgroundColor = '#f0f0f0';
-              infoPopupOpen(e.target.className);
+
+
+            let statusicon = createElementFromHTML("<span class='" + resp[i].MessageGuid + flash + "' ><span data-sap-ui-icon-content='" + statusIcon + "' class='sapUiIcon sapUiIconMirrorInRTL' style='font-family: SAP-icons; font-size: 0.9rem; color:" + statusColor + ";'></span> ");
+
+            inlineTraceButton.onmouseover = (e) => {
+
+              infoPopupOpen(e.currentTarget.classList[0]);
               infoPopupSetTimeout(null);
             };
-            timeButton.onmouseout = (e) => {
-              e.target.style.backgroundColor = '#fbfbfb';
+            inlineTraceButton.onmouseout = (e) => {
               infoPopupSetTimeout(2000);
             };
 
-            timeButton.onmouseup = async (e) => {
-              if (activeInlineItem == e.target.className) {
+            inlineTraceButton.onmouseup = async (e) => {
+              if (activeInlineItem == e.currentTarget.classList[0]) {
+
                 hideInlineTrace();
                 showSnackbar("Inline Debugging Deactivated");
                 activeInlineItem = null;
               } else {
                 hideInlineTrace();
-                var inlineTrace = await showInlineTrace(e.target.className);
+                var inlineTrace = await showInlineTrace(e.currentTarget.classList[0]);
                 if (inlineTrace) {
                   showSnackbar("Inline Debugging Activated");
-                  e.target.classList.add("cpiHelper_inlineInfo-active");
-                  activeInlineItem = e.target.className;
+                  e.currentTarget.classList.add("cpiHelper_inlineInfo-active");
+
+                  activeInlineItem = e.currentTarget.classList[0];
                 } else {
                   activeInlineItem = null;
                   showSnackbar("Inline Debugging not Possible. No data found.");
@@ -204,25 +215,25 @@ async function getLogs() {
               }
 
 
-              e.target.style.backgroundColor = 'red';
+              //   e.target.style.backgroundColor = 'red';
 
             };
 
-
-            listItem.appendChild(timeButton);
+            listItem.appendChild(statusicon);
+            listItem.appendChild(inlineTraceButton);
             listItem.appendChild(infoButton);
             listItem.appendChild(traceButton);
 
             messageList.appendChild(listItem)
 
             document.getElementById("info--" + i).addEventListener("click", (a) => {
-              openInfo(a.srcElement.className);
+              openInfo(a.currentTarget.className);
             });
 
 
             document.getElementById("trace--" + i).addEventListener("click", (a) => {
 
-              openTrace(a.srcElement.className);
+              openTrace(a.currentTarget.className);
 
             });
 
@@ -391,6 +402,7 @@ async function clickTrace(e) {
 
 
       navigator.clipboard.writeText(text).then(function () {
+        showSnackbar("Copied!")
         console.log('Async: Copying to clipboard was successful!');
       }, function (err) {
         console.error('Async: Could not copy text: ', err);
@@ -991,7 +1003,7 @@ var sidebar = {
     <div id="iflowName" class="contentText"></div>
     <div id="updatedText" class="contentText"></div>
     
-    <ul id="messageList"></ul>
+    <div id="messageList" class="contentText"></div>
     <div><button id="closeButton" >Close Sidebar</button></div>
     
     </div>
@@ -1323,9 +1335,28 @@ function initIflowPage() {
   //inject needed css for sidebar
   cssStyle = `
 
+  .cpiHelper_inlineInfo-active {
+    border: solid 1px #be6500;
+  }
+
+  .cpiHelper_inlineInfo-button:focus {
+    outline:none;
+  }
+
+
+
+  .cpiHelper_messageListItem {
+      padding: 0.05em;
+      padding-left: 0.5em;
+  }
+
       button
       {
         cursor: pointer;
+        border: solid 1px #d2d2d2;
+        border-radius: 4px;
+        background: white;
+
       }
 
       #cpiHelper_sidebar_popup
@@ -1370,7 +1401,7 @@ function initIflowPage() {
         background:#fbfbfb;
         top:100px;
         right:0px;
-        width:220px;
+        width:240px;
         opacity: 0.9;
       }   
   
@@ -1380,10 +1411,6 @@ function initIflowPage() {
         z-index: 10;
         background-color: #009fe3;
         color: #fff;
-      }
-  
-      button {
-        border: none;
       }
   
       .contentText {
@@ -1483,8 +1510,8 @@ function initIflowPage() {
   /* Modal Content */
 
   .cpiHelper_inlineInfo {
-    fill:#a2ffa2 !important;
-    stroke:#00ff00 !important;
+    fill:#009fe3 !important;
+    stroke:#009fe3 !important;
   }
 
   .cpiHelper_inlineInfo.cpiHelper_inlineInfo_error {
@@ -1614,7 +1641,8 @@ function initIflowPage() {
 table {
   background:#eaebec;
   table-layout:fixed;
-	border:#ccc 0px solid;
+  border:#ccc 0px solid;
+  width: 100%;
 }
 
 table th {

@@ -16,7 +16,7 @@ function addLastVisitedIflows() {
 
 
         var html = `
-        <h3>Last Visited Integration Flows on Tenant ${name.split("_")[1]}</h3>
+        <h3>Last Visited on Tenant ${name.split("_")[1]}</h3>
         <ul style="list-style-type:disc;"> `;
 
         for (var i = visitedIflows.length - 1; i > -1; i--) {
