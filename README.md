@@ -1,13 +1,15 @@
 # ConVista-CPI-Helper-Chrome-Extension
-This Chrome Plugin extends the SAP Cloud Platform Integration with some useful features. It includes a button to activate traces and a message sidebar directly in the Integration-Flow-Designer.
-As SAP is not well known for it's usability it was time to integrate some features ourselves.
+This Chrome Plugin extends the SAP Cloud Platform Integration with some useful features.
 
-## Special Thanks
-Many thanks to ConVista Consulting AG in Cologne, Germany. They supported this idea from the beginning and contributed time and ressources for me to start this project. Also many thanks to open this project to the public under GNU GPLv3. I hope there will be many more people to contribute in the future.
+I recommend to read the readme first but if you know what you are doing, you can add it to your Chrome Browser directly:
+[![Chrome Web Store](https://developer.chrome.com/webstore/images/ChromeWebStore_Badge_v2_206x58.png)](https://chrome.google.com/webstore/detail/convista-sap-cpi-helper/epoggeaemnkacpinjfgccbjakglngkpb)
 
 ## Features
 ### Integration Flow Designer Improvements
 - Sidebar with processed messages
+- Activate InlineTrace to see message route in integration flow designer
+- Directly see trace messages in integration flow designer
+- Pretty print for trace messages in integration flow designer
 - Button to switch on trace
 - Directly go to traces of specific message
 - Directly go to logs and attachements of specific message
@@ -19,6 +21,15 @@ Many thanks to ConVista Consulting AG in Cologne, Germany. They supported this i
 - Last visited iflows in browser-bar-popup
 
 ## Changelog
+### 1.0.0
+- [Feature] Pop up to see trace messages directly in designer
+- [Feature] Added beautifier to trace in designer
+- [Feature] Content logs in trace pop-up
+- [Improvement] Smaller message sidebar
+### 0.8.0
+- [Improvement] Many design improvements
+### 0.7.0
+- [Feature] Added inline-trace feature in designer
 ### 0.5.6
 - [Improvement] Improved xcsrf token exchange
 ### 0.5.5
@@ -74,7 +85,7 @@ If you have cloned the repository, pull new data. Than delete and add the plugin
 ### New Buttons
 If you open an Integration Flow, the plugin will automatically add a "Messages", a "Trace" and a "Info" button in the Integration-Flow-Designer. 
 #### Message Button
-The "Message" button opens a small dragable sidebar with the last processed messages. You can jump directly to infos and traces of the message run. If you hover messages with error, you will see the error message directly. 
+The "Message" button opens a small dragable sidebar with the last processed messages. You can jump directly to infos and traces of the message run. If you hover status icon of message, you will see a pop-up with the error message directly. If you click on the time button,InlineTrace is activated (Only when trace was activated for message). If you click on a color coded integration flow item and trace is available, a pop-up opens with the trace of the message at this point.
 ![Screenshot](https://raw.githubusercontent.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension/master/images/screenshots/chrome1.png)
 
 ![Screenshot](https://raw.githubusercontent.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension/master/images/screenshots/chrome4.png)
@@ -87,20 +98,21 @@ The "Info"-Button lets you see detailed informations of the deployment state of 
 The button of the plugin in the toolbar gives you a list of useful links of you current tenant. It includes last visited Integration Flows.
 ![Screenshot](https://raw.githubusercontent.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension/master/images/screenshots/chrome3.png)
 See also the [SAP Community Blog](https://blogs.sap.com/2020/03/05/cpi-chrome-plugin-to-enhance-sap-cloud-platform-integration-usability/#)
+## FAQ
+### How can I activate InlineTrace?
+Run a message with trace activated. You see the message in the message sidebar. Click on the button with the time for the specific message. If trace is available, items which processed the message change color. You can click on integration flow elements to see the trace message before this step.
+### How long is the trace available?
+SAP deletes trace messages after a while. Trace messages normally do not live longer than 1 hour.
 ## Contributing
 See [Contribution guidelines for this project](docs/CONTRIBUTING.md) if you want to take part in this project. As I am a beginner myself, beginners are welcome.
 
 ## Todos
-### New Features:
-
-- Add possibility to show errors, payloads, properties and headers from messages directly in the design screen
-
-### Things to Improve:
-- Find a better way to get the X-CSRF-Token. Currently there is a background javascript for that.
-- Find a better way to detect url changes
-- Improve design
+- Change tab name to tenant name to better differentiate between different tenants
 
 If you have any ideas, please write a message or comment at the [SAP Community](https://blogs.sap.com/2020/03/05/cpi-chrome-plugin-to-enhance-sap-cloud-platform-integration-usability/#)
+
+## Special Thanks
+Many thanks to ConVista Consulting AG in Cologne, Germany. They supported this idea from the beginning and contributed time and ressources for me to start this project. Also many thanks to open this project to the public under GNU GPLv3. I hope there will be many more people to contribute in the future.
 
 ## License
 [GNU GPLv3](https://choosealicense.com/licenses/gpl-3.0/)
