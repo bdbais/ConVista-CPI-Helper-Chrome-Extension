@@ -26,6 +26,7 @@ I recommend to read the readme first but if you know what you are doing, you can
 - [Feature] Added beautifier to trace in designer
 - [Feature] Content logs in trace pop-up
 - [Improvement] Smaller message sidebar
+- [Improvement] New icon
 ### 0.8.0
 - [Improvement] Many design improvements
 ### 0.7.0
@@ -33,7 +34,7 @@ I recommend to read the readme first but if you know what you are doing, you can
 ### 0.5.6
 - [Improvement] Improved xcsrf token exchange
 ### 0.5.5
-- [Bugfix] Hopefully fixed not working trace in some cases
+- [Bugfix] Fixed not working trace in some cases
 ### 0.5.3
 - [Bugfix] Info-popup deployed on time is now in locale time zone
 - [Bugfix] Fixed bug in info-popup
