@@ -113,11 +113,11 @@ On the message sidebar, press the time-button next to the status icon of a proce
 SAP does not provide good information about errors. So when an error at a Splitter-Element occurs, this does not have to mean that the error occured here. It can also be a catched error from elements after the Splitter.
 
 Run steps exists for processed messages with trace and for a short time in processed messages with errors.
-![Screenshot](https://raw.githubusercontent.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension/master/images/screenshots/chrome inlinetrace.png)
+![Screenshot](https://raw.githubusercontent.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension/master/images/screenshots/chrome_inlinetrace.png)
 ### Inline Trace - Show Headers, Properties, Trace, Error and Logs
 If you activated the Inline Trace feature, you can get more details. Traces only exist for processed messages with loglevel trace and will be deleted after round about 1 hour by SAP.
-![Screenshot](https://raw.githubusercontent.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension/master/images/screenshots/chrome trace properties.png)
-![Screenshot](https://raw.githubusercontent.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension/master/images/screenshots/chrome after beautify.png)
+![Screenshot](https://raw.githubusercontent.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension/master/images/screenshots/chrome_trace_properties.png)
+![Screenshot](https://raw.githubusercontent.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension/master/images/screenshots/chrome_after_beautify.png)
 ## FAQ
 ### How can I activate InlineTrace?
 Run a message with trace activated. You see the message in the message sidebar. Click on the button with the time for the specific message. If trace is available, items which processed the message change color. You can click on integration flow elements to see the trace message before this step.
