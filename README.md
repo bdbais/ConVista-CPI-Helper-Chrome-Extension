@@ -21,10 +21,15 @@ I recommend to read the readme first but if you know what you are doing, you can
 - Last visited iflows in browser-bar-popup
 
 ## Changelog
+### 1.0.2
+- [Bugfix] Fixed icon in Chrome Store
+### 1.0.1
+- [Bugfix] Fixed issue with error pop-up
 ### 1.0.0
 - [Feature] Pop up to see trace messages directly in designer
 - [Feature] Added beautifier to trace in designer
 - [Feature] Content logs in trace pop-up
+- [Feature] Show error in InlineTrace PopUp
 - [Improvement] Smaller message sidebar
 - [Improvement] New icon
 ### 0.8.0

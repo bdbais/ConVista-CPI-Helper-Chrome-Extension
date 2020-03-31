@@ -190,7 +190,7 @@ async function getLogs() {
             activeInlineItem == inlineTraceButton.classList[0] && inlineTraceButton.classList.add("cpiHelper_inlineInfo-active");
 
 
-            let statusicon = createElementFromHTML("<button class='cpiHelper_sidebar_iconbutton'><span data-sap-ui-icon-content='" + statusIcon + "' class='" + resp[i].MessageGuid + " sapUiIcon sapUiIconMirrorInRTL' style='font-family: SAP-icons; font-size: 0.9rem; color:" + statusColor + ";'> </span></button>");
+            let statusicon = createElementFromHTML("<button class='" + resp[i].MessageGuid + " cpiHelper_sidebar_iconbutton'><span data-sap-ui-icon-content='" + statusIcon + "' class='" + resp[i].MessageGuid + " sapUiIcon sapUiIconMirrorInRTL' style='font-family: SAP-icons; font-size: 0.9rem; color:" + statusColor + ";'> </span></button>");
 
             statusicon.onmouseover = (e) => {
 
@@ -441,7 +441,7 @@ async function clickTrace(e) {
         pre.classList.add("prettyprint");
         pre.classList.add("linenums");
         pre.style.border = "none";
-        pre.style.whiteSpace = "normal";
+        pre.style.whiteSpace = "pre-wrap";
         pre.style.margin = "0px";
         pre.innerHTML = prettify(unformatted.innerText);
         formatted.appendChild(pre);
@@ -556,6 +556,19 @@ async function clickTrace(e) {
       }
       ]
 
+      if (targetElements[n].Error) {
+        let innerContent = document.createElement("div");
+        innerContent.classList.add("cpiHelper_traceText");
+        innerContent.innerText = targetElements[n].Error;
+        innerContent.style.display = "block";
+
+        objects.push({
+          label: "Error",
+          content: innerContent,
+          active: false
+        }
+        );
+      }
 
 
       runs.push({
@@ -656,19 +669,19 @@ async function createTabHTML(objects, idPart, overwriteActivePosition) {
             let contentResponse = await objects[i].content(objects[i]);
             if (typeof (contentResponse) == "object") {
               contentElement.innerHTML = "";
-
               contentElement.appendChild(contentResponse);
-            } else {
-              contentElement.innerHTML = await objects[i].content(objects[i]);
-
-
+            }
+            if (typeof (contentResponse) == "string") {
+              contentElement.innerHTML = contentResponse;
+            }
+            if (typeof (contentResponse) == "function") {
+              contentElement.innerHTML = contentResponse(objects[i]);
             }
           }
         }
       }
 
 
-      //label
       let label = createElementFromHTML(`<label for="tab-${idPart}-${i}" class="cpiHelper_tabs_label">${objects[i].label}</label>`);
 
       //content of tab
@@ -716,7 +729,8 @@ async function createInlineTraceElements(MessageGuid) {
         ModelStepId: run.ModelStepId,
         ChildCount: run.ChildCount,
         RunId: run.RunId,
-        BranchId: run.BranchId
+        BranchId: run.BranchId,
+        Error: run.Error
       });
     });
 
@@ -775,6 +789,10 @@ async function showInlineTrace(MessageGuid) {
         element.onclick = clickTrace;
         onClicKElements.push(element);
 
+        if (run.Error) {
+          target.classList.add("cpiHelper_inlineInfo_error");
+        }
+
         if (!observerInstalled) {
 
           observer = new MutationObserver((mutations) => {
@@ -793,14 +811,6 @@ async function showInlineTrace(MessageGuid) {
           });
           observerInstalled = true;
         }
-
-
-        if (run.Error) {
-          target.classList.add("cpiHelper_inlineInfo_error");
-        }
-
-
-
 
       } catch (e) {
         console.log("no element found for " + run.StepId);
@@ -996,7 +1006,21 @@ function openIflowInfoPopup() {
       }
     });
   }
+  //JSON?
 
+  // List Variables
+  // GET https://p0349-tmn.hci.eu1.hana.ondemand.com/itspaces/Operations/com.sap.esb.monitoring.datastore.access.command.ListDataStoreEntriesCommand?storeName=sap_global_store&allStores=true&maxNum=100000
+
+  //Get Variable XCSRF
+  //https://p0349-tmn.hci.eu1.hana.ondemand.com/itspaces/Operations/com.sap.esb.monitoring.datastore.access.command.GetDataStoreVariableCommand
+  // {"storeName":"sap_global_store","id":"keywordsSinceIds","qualifier":"Sentiment_Engagement_-_Twitter_Keywords_Search_Integration_Flow"}
+
+  //delete variables XCSRF
+  // POST https://p0349-tmn.hci.eu1.hana.ondemand.com/itspaces/Operations/com.sap.esb.monitoring.datastore.access.command.DeleteDataStoreEntryCommand
+  // {"storeName":"sap_global_store","ids":["dateglobal"]}
+
+
+  //undeploy button
   if (deployedOn) {
     var undeploybutton = document.createElement('button');
     undeploybutton.innerText = "Undeploy";
