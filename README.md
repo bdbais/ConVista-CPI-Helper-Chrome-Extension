@@ -71,6 +71,7 @@ There are two options to install this plugin:
 ### Install directly from Chrome Web Store (recommended)
 Just add the plugin in the [Chrome Web Store](https://chrome.google.com/webstore/detail/convista-sap-cpi-helper/epoggeaemnkacpinjfgccbjakglngkpb).
 This is probably the easiest way. Updates will be installed automatically.
+[![Chrome Web Store](https://developer.chrome.com/webstore/images/ChromeWebStore_Badge_v2_206x58.png)](https://chrome.google.com/webstore/detail/convista-sap-cpi-helper/epoggeaemnkacpinjfgccbjakglngkpb)
 
 Please note: there was an old Chrome Store entry that is not updated anymore. If you installed the plugin before 21 March 2020, you have to uninstall and install again with the link above.
 ### Install in Developer Mode from Sources
@@ -82,6 +83,7 @@ Clone the repo and add the folder directly to Google Chrome
 >- Click: "Load Unpacked Extension" and select the folder with the plugin data
 
 ## Update
+Attention: If you installed the plugin from Chrome Store before 21 March 2020, please uninstall and install again with the link on the top.
 Chrome updates extensions that are installed from the Chrome Web Store automatically. 
 If you installed the plugin from sources:
 Please replace the folder with the new version on your disk. After that you must delete and add the plugin in Chrome Browser.
@@ -104,6 +106,18 @@ The "Info"-Button lets you see detailed informations of the deployment state of 
 The button of the plugin in the toolbar gives you a list of useful links of you current tenant. It includes last visited Integration Flows.
 ![Screenshot](https://raw.githubusercontent.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension/master/images/screenshots/chrome3.png)
 See also the [SAP Community Blog](https://blogs.sap.com/2020/03/05/cpi-chrome-plugin-to-enhance-sap-cloud-platform-integration-usability/#)
+### Inline Trace
+On the message sidebar, press the time-button next to the status icon of a processed message. If run steps exist, the elements of the Integration Flow will change colors accordingly. This will give you a quick overview over the run.
+>- Blue elements are successfully processed steps
+>- Red elements are elements with errors.
+SAP does not provide good information about errors. So when an error at a Splitter-Element occurs, this does not have to mean that the error occured here. It can also be a catched error from elements after the Splitter.
+
+Run steps exists for processed messages with trace and for a short time in processed messages with errors.
+![Screenshot](https://raw.githubusercontent.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension/master/images/screenshots/chrome inlinetrace.png)
+### Inline Trace - Show Headers, Properties, Trace, Error and Logs
+If you activated the Inline Trace feature, you can get more details. Traces only exist for processed messages with loglevel trace and will be deleted after round about 1 hour by SAP.
+![Screenshot](https://raw.githubusercontent.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension/master/images/screenshots/chrome trace properties.png)
+![Screenshot](https://raw.githubusercontent.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension/master/images/screenshots/chrome after beautify.png)
 ## FAQ
 ### How can I activate InlineTrace?
 Run a message with trace activated. You see the message in the message sidebar. Click on the button with the time for the specific message. If trace is available, items which processed the message change color. You can click on integration flow elements to see the trace message before this step.
