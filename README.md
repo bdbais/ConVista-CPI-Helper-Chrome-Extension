@@ -1,4 +1,4 @@
-# ConVista-CPI-Helper-Chrome-Extension
+# ConVista CPI-Helper Chrome-Extension
 This Chrome Plugin extends the SAP Cloud Platform Integration with some useful features.
 
 I recommend to read the readme first but if you know what you are doing, you can add it to your Chrome Browser directly:
@@ -21,6 +21,8 @@ I recommend to read the readme first but if you know what you are doing, you can
 - Last visited iflows in browser-bar-popup
 
 ## Changelog
+### 1.0.3
+- [Improvement] Improved speed beautifier with big xml structures. 
 ### 1.0.2
 - [Bugfix] Fixed icon in Chrome Store
 ### 1.0.1
@@ -133,6 +135,9 @@ If you have any ideas, please write a message or comment at the [SAP Community](
 
 ## Special Thanks
 Many thanks to ConVista Consulting AG in Cologne, Germany. They supported this idea from the beginning and contributed time and ressources for me to start this project. Also many thanks to open this project to the public under GNU GPLv3. I hope there will be many more people to contribute in the future.
+
+### Contributers
+>- [Raffael Herrmann](https://github.com/codebude): Speed up handling of large XML structures in beautifier.
 
 ## License
 [GNU GPLv3](https://choosealicense.com/licenses/gpl-3.0/)
