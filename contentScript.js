@@ -328,13 +328,8 @@ async function clickTrace(e) {
   var formatTrace = function (input, id) {
 
     var encodeHTML = function (str) {
-      var buf = [];
 
-      for (var i = str.length - 1; i >= 0; i--) {
-        buf.unshift(['&#', str[i].charCodeAt(), ';'].join(''));
-      }
-
-      return buf.join('');
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/\n/g, '&#010;').replace(/'/g, "&#039;");
     }
 
     var formatXml = function (sourceXml) {
