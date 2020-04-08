@@ -535,7 +535,7 @@ async function clickTrace(e) {
         runId: runId,
         traceType: "headers"
       }, {
-        label: "Trace",
+        label: "Body",
         content: getTraceTabContent,
         active: false,
         childCount: childCount,

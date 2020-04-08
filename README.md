@@ -22,7 +22,7 @@ I recommend to read the readme first but if you know what you are doing, you can
 
 ## Changelog
 ### 1.0.3
-- [Improvement] Improved speed beautifier with big xml structures. 
+- [Improvement] Improved speed beautifier with big xml structures
 ### 1.0.2
 - [Bugfix] Fixed icon in Chrome Store
 ### 1.0.1
