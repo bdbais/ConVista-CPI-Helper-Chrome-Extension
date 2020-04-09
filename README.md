@@ -13,8 +13,9 @@ I recommend to read the readme first but if you know what you are doing, you can
 - Button to switch on trace
 - Directly go to traces of specific message
 - Directly go to logs and attachements of specific message
-- Popup with error-message when hovering message in sidebar
-- Popup with deployment info
+- Pop-up with error-message when hovering message in sidebar
+- Pop-up with deployment info
+- View and delete variables in info pop-up
 
 ### General CPI Improvements
 - Useful links in browser-bar-popup
