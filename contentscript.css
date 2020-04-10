@@ -6,7 +6,7 @@
 
 /* start snackbar */
 
-#snackbar {
+#cpiHelper_snackbar {
   visibility: hidden;
   min-width: 250px;
   margin-left: -125px;
@@ -22,28 +22,18 @@
   font-size: 17px;
 }
 
-#snackbar.show {
+#cpiHelper_snackbar.cpiHelper_snackbar_show {
   visibility: visible;
-  -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
-  animation: fadein 0.5s, fadeout 0.5s 2.5s;
+  -webkit-animation: cpiHelper_fadein 0.5s, cpiHelper_fadeout 0.5s 2.5s;
+  animation: cpiHelper_fadein 0.5s, cpiHelper_fadeout 0.5s 2.5s;
 }
 
-@-webkit-keyframes fadein {
-  from {bottom: 0; opacity: 0;} 
-  to {bottom: 30px; opacity: 1;}
-}
-
-@keyframes fadein {
+@keyframes cpiHelper_fadein {
   from {bottom: 0; opacity: 0;}
   to {bottom: 30px; opacity: 1;}
 }
 
-@-webkit-keyframes fadeout {
-  from {bottom: 30px; opacity: 1;} 
-  to {bottom: 0; opacity: 0;}
-}
-
-@keyframes fadeout {
+@keyframes cpiHelper_fadeout {
   from {bottom: 30px; opacity: 1;}
   to {bottom: 0; opacity: 0;}
 }
@@ -51,14 +41,14 @@
 /* end snackbar */  
 
 
-table#messageList {
+.cpiHelper table#messageList {
 
 border: 0px;
 background: none;
 width: initial;
 }
 
-table#messageList td {
+.cpiHelper table#messageList td {
 padding: 0px;
 background: initial;
 }
@@ -125,7 +115,7 @@ color:white;
     to {bottom: 0; opacity: 0; }
   }
 
-  #outerFrame {
+  .cpiHelper #outerFrame {
     border: solid 1px #e1e1e1;
     padding: 10px;
   }
@@ -148,13 +138,13 @@ color:white;
     color: #fff;
   }
 
-  .contentText {
+  .cpiHelper .contentText {
     padding: 5px;
     overflow-wrap: break-word;
   }
 
-  .flash {
-    animation-name: flash;
+  .cpiHelper .flash {
+    animation-name: cpiHelper_flash;
     animation-duration: 2s;
     animation-timing-function: linear;
     animation-iteration-count: infinite;
@@ -163,7 +153,7 @@ color:white;
   animation-iteration-count: 1;
   }
 
-  @keyframes flash {
+  @keyframes cpiHelper_flash {
     from {background: #009fe3;}
     to {background: none;}
   }
@@ -226,14 +216,15 @@ color: #fff;
 }
 
 /* The Close Button */
-#cpiHelper_bigPopup_close {
-float: right;
-font-size: 1.2rem;
-font-weight: bold;
-}
 
-#cpiHelper_bigPopup_close:hover,
-#cpiHelper_bigPopup_close:focus {
+.cpiHelper_closeButton{
+  float: right;
+  font-size: 1.2rem;
+  font-weight: bold;
+  }
+
+.cpiHelper_closeButton:hover,
+.cpiHelper_closeButton:focus {
 color: #000;
 text-decoration: none;
 cursor: pointer;
@@ -312,7 +303,7 @@ background: #fff;
 display: block;
 }
 
-table {
+.cpiHelper table {
 background:#eaebec;
 table-layout:fixed;
 border:#ccc 0px solid;
@@ -320,30 +311,29 @@ width: 100%;
 table-layout: auto;
 }
 
-table th {
+.cpiHelper table th {
 text-align: left;
 padding:2px;
 border-top:0px solid #ccc;
 border-bottom:0px solid #ccc;
 background: #f1f1f1;
 }
-table tr {
+.cpiHelper table tr {
 padding-left:5px;
 }
-table td:first-child {
+.cpiHelper table td:first-child {
 text-align: left;
 padding-left:5px;
 border-left: 0;
 }
-table td {
+.cpiHelper table td {
 padding:4px;
 border-top: 0px solid #ffffff;
 border-bottom:0px solid #e0e0e0;
 border-left: 0px solid #e0e0e0;
-
 background: #f1f1f1;
 }
-table tr.even td {
+.cpiHelper table tr.even td {
 background: #e8e8e8;
 
 }
@@ -362,7 +352,7 @@ display: none;
 display:block;
 }
 
-li.L0, li.L1, li.L2, li.L3,
-li.L5, li.L6, li.L7, li.L8 {
+.cpiHelper li.L0, .cpiHelper li.L1, .cpiHelper li.L2, .cpiHelper li.L3,
+.cpiHelper li.L5, .cpiHelper li.L6, .cpiHelper li.L7, .cpiHelper li.L8 {
 list-style-type: decimal !important;
 }
