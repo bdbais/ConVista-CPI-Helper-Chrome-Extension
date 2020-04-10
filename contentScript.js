@@ -292,7 +292,7 @@ async function showBigPopup(content, header) {
 
   var textElement = `
    <div id="cpiHelper_bigPopup_outerFrame">
-   <div id="cpiHelper_bigPopup_contentheader">ConVista CPI Helper ${header}<span id="cpiHelper_bigPopup_close">X</div>
+   <div id="cpiHelper_bigPopup_contentheader">ConVista CPI Helper ${header}<span id="cpiHelper_bigPopup_close" class="cpiHelper_closeButton">X</div>
      <div id="cpiHelper_bigPopup_content">
      Please Wait...
    </div> 
@@ -1243,15 +1243,15 @@ function showSnackbar(message) {
   //css for snackbar is already there. see initIflowPage()
 
   //create snackbar div element
-  var x = document.getElementById("snackbar");
+  var x = document.getElementById("cpiHelper_snackbar");
   if (!x) {
     x = document.createElement('div');
-    x.id = "snackbar";
+    x.id = "cpiHelper_snackbar";
     document.body.appendChild(x);
   }
   x.innerHTML = message;
-  x.className = "show";
-  setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
+  x.className = "cpiHelper_snackbar_show";
+  setTimeout(function () { x.className = x.className.replace("cpiHelper_snackbar_show", ""); }, 3000);
 }
 
 //the sidebar that shows messages
@@ -1274,7 +1274,7 @@ var sidebar = {
     //create sidebar div
     var elem = document.createElement('div');
     elem.innerHTML = `
-    <div id="cpiHelper_contentheader">ConVista CPI Helper<span id='sidebar_modal_close' class='modal_close'>X</span></div> 
+    <div id="cpiHelper_contentheader">ConVista CPI Helper<span id='sidebar_modal_close' class='cpiHelper_closeButton'>X</span></div> 
     <div id="outerFrame">
     <div id="updatedText" class="contentText"></div>
     
