@@ -22,6 +22,8 @@ I recommend to read the readme first but if you know what you are doing, you can
 - Last visited iflows in browser-bar-popup
 
 ## Changelog
+### 1.1.1
+- [Bugfix] Fixed some css issues
 ### 1.1.0
 - [Feature] View and delete variables in info pop-up
 - [Feature] What's new screen when updating
