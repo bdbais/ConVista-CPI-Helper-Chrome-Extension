@@ -136,6 +136,7 @@ See [Contribution guidelines for this project](docs/CONTRIBUTING.md) if you want
 
 ## Todos
 - Change tab name to tenant name to better differentiate between different tenants
+- Inject data from trace in the simulation function
 
 If you have any ideas, please write a message or comment at the [SAP Community](https://blogs.sap.com/2020/03/05/cpi-chrome-plugin-to-enhance-sap-cloud-platform-integration-usability/#)
 
