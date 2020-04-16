@@ -26,7 +26,8 @@
       "js": [
         "/lib/prettify/prettify.js",
         "/lib/jszip/jszip.min.js",
-        "contentScript.js"
+        "contentScript.js",
+        "identify-tenant.js"
       ],
       "css": [
         "/lib/prettify/prettify.css",
@@ -49,5 +50,8 @@
     "48": "images/cpi_helper48.png",
     "128": "images/cpi_helper128.png"
   },
+  "web_accessible_resources": [
+    "images/favicons/*.png"
+  ],
   "manifest_version": 2
 }
