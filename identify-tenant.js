@@ -1,7 +1,8 @@
 {
   console.log('Initializing tentant identification')
   let host = window.location.host // global variable to hold host name
-  let intervalId; // used by the interval to set document title
+  let documentTitleIntervalId; // used by the interval to set document title
+  let observerIntervalId; // used to attach a MutationObserver callback
   let hostData = {
     title: 'Cloud Integration',
     color: '#354a5f',
@@ -60,29 +61,44 @@
 
   // Listen for changes to the DOM and update the UI5 header
   function handleDOMChanges() {
-    let observer = new MutationObserver(mutations => {
-      // Set the header background        
-      for (let mutation of mutations) {
-        if (mutation.type == 'childList') {
-          for (let addedNode of mutation.addedNodes) {
-            if (addedNode.id == 'shell--toolHeader') {
-              console.log('Updating color')
-              getHostData(data => {
-                console.log(`Got this color for the host: ${data.color}`)
-                addedNode.style.backgroundColor = data.color
-              })
-            }
-          }
-        }
-      }
-    });
-    observer.observe(document.querySelector('#shellcontent'), { childList: true, subtree: true })
-    console.log('Oberver is running')
+    clearInterval(observerIntervalId);
+    let observer = new MutationObserver(mutationCallback);
+    attachObserver(observer)
   }
 
   ////////////////////////
   /// Helper functions ///
   ////////////////////////
+
+  // Handle DOM mutations
+  function mutationCallback (mutations) {
+    // Set the header background       
+    for (let mutation of mutations) {
+      if (mutation.type === 'childList') {
+        for (let addedNode of mutation.addedNodes) {
+          if (addedNode.id === 'shell--toolHeader') {
+            getHostData(data => {
+              addedNode.style.backgroundColor = data.color
+            })
+          }
+        }
+      }
+    }
+  }
+
+  // Initiate the MutationObserver when div#shellcontent is available
+  function attachObserver (observer) {
+    let shellContent = document.querySelector('#shellcontent')
+    if (shellContent) {
+      clearInterval(observerIntervalId);
+      observer.observe(shellContent, { childList: true, subtree: true })
+    } else {
+      if (!observerIntervalId) {
+        console.log('Starting observer interval')
+        setInterval(attachObserver, 1000, [observer]);
+      }
+    }
+  }
 
   // Get the data for this host
   function getHostData(callback) {
@@ -108,7 +124,7 @@
 
   // interval is used to overwrite SAPUI5 behaviour
   function setData({title, color, icon}) {
-    clearInterval(intervalId)
+    clearInterval(documentTitleIntervalId)
     // Update element now
     setDocumentTitle(title);
     setHeaderColor(color)
@@ -118,14 +134,14 @@
     let intervalDelay = 2000;
     // set title again aftet 2sec
     console.log('Initiate title update sequence')
-    intervalId = setInterval(() => {
+    documentTitleIntervalId = setInterval(() => {
       intervalCount--;
       setDocumentTitle(title)
       setHeaderColor(color)
       setFavIcon(icon)
       if (intervalCount == 0) {
         console.log('Ending update sequence')
-        clearInterval(intervalId);
+        clearInterval(documentTitleIntervalId);
       }
     }, intervalDelay)
   }
