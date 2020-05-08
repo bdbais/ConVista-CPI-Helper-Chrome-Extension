@@ -22,6 +22,9 @@ I recommend to read the readme first but if you know what you are doing, you can
 - Last visited iflows in browser-bar-popup
 
 ## Changelog
+### 1.2.0
+- [Feature] Select tab icon, text and tenant color for your tenants
+- [Bugfix] Improved compatibility with Cloud Foundry
 ### 1.1.1
 - [Bugfix] Fixed some css issues
 ### 1.1.0

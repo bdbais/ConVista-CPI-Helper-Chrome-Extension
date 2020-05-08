@@ -1551,6 +1551,7 @@ async function whatsNewCheck() {
     html = `<div id="cpiHelper_WhatsNew">Thank you for using the ConVista CPI Helper. <p>You hace successfully updated to version ${manifestVersion}</p> 
     <h3>Recent Innovations</h3>
     <ul>
+    <li>Version 1.2.0: You can now change the tab icon, text and main color of your different CPI tenants. This is very helpful when you have dev and prod tenant or different customers. You can make these settings on the CPI Helper icon (the cloud) in your browser bar (normally on the top right).
     <li>Version 1.1.0: You can now view and delete variables in the Integration Flow Info-PopUp (Press Info in the right top corner)
     <li>Version 1.0.0: Activate InlineTrace to debug your Integration Flows directly in the Designer (<a href="https://blogs.sap.com/2020/03/31/cpi-the-next-evolution-see-traces-directly-in-the-integration-flow-designer-of-sap-cloud-platform-integration/" target="_blank">more</a>)
   </ul>
