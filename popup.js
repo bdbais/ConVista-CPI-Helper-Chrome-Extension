@@ -33,6 +33,26 @@ function addTenantUrls() {
     var tenantUrls = document.getElementById("tenantUrls");
     tenantUrls.innerHTML = `
         <h3>This Tenant</h3>
+        <div>
+            <label for="tenanName">Set custom name for tab:</label>
+            <input type="text" name="tenantName" id="tenantName"/>
+        </div>
+        <div>
+            <label for="color">Select tenant color</label>
+            <input type="color" name="color" id="colorSelect"/>
+        </div>
+        <div>
+            <label for="icon-select">Choose an icon:</label>
+            <select name="pets" id="icon-select">
+                <option value="default">Default</option>
+                <option value="1">Blue</option>
+                <option value="2">Green</option>
+                <option value="3">Red</option>
+                <option value="4">Purple</option>
+                <option value="5">Yellow</option>
+                <option value="6">Orange</option>
+            </select>
+        </div>
         <ul style="list-style-type:disc;">
 
         <li><a href="${host + '/itspaces/shell/monitoring/Messages/'}" target="_blank">Processed Messages</a></li>
@@ -128,12 +148,60 @@ function checkUpdate() {
         }).catch(console.log); */
 }
 
+// Handle tenantname changes
+function tenantIdentityChanges () {
+    let hostData = {}
+    chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+        let tenantName = document.querySelector('#tenantName')
+        let tenantColor = document.querySelector('#colorSelect')
+        let tenantIcon = document.querySelector('#icon-select')
+        
+        let timeoutId;
+        let tab = tabs[0];
+
+        // get the current document title - this runs evey time the popup is opened
+        chrome.tabs.sendMessage(tab.id, 'get', response => {
+            console.dir(response)
+            tenantName.value = hostData.title = response.title;
+            tenantColor.value = hostData.color = response.color;
+            tenantIcon.value = hostData.icon = response.icon
+        });
+
+        // Autosave on change after 1s
+        tenantName.addEventListener('input', () => {
+            clearTimeout(timeoutId)
+            timeoutId = setTimeout(() => {
+                hostData.title = tenantName.value
+                chrome.tabs.sendMessage(tab.id, { save: hostData }, (response) => {
+                    console.dir(response);
+                })
+            }, 1000);
+        })
+
+        // Update color on change
+        tenantColor.addEventListener('change', () => {
+            hostData.color = tenantColor.value
+            chrome.tabs.sendMessage(tab.id, { save: hostData }, (response) => {
+                console.dir(response);
+            })
+        })
+
+        // Update icon on input
+        tenantIcon.addEventListener('input', () => {
+            hostData.icon = tenantIcon.value
+            chrome.tabs.sendMessage(tab.id, { save: hostData }, (response) => {
+                console.dir(response);
+            })
+        })
+    })
+}
+
 async function main() {
     checkUpdate();
     host = await getHost();
     addLastVisitedIflows();
     addTenantUrls();
+    tenantIdentityChanges();
 }
 
-main();
-
+main().catch(e => console.error(e))
