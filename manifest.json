@@ -27,7 +27,9 @@
         "/lib/prettify/prettify.js",
         "/lib/jszip/jszip.min.js",
         "contentScript.js",
-        "identify-tenant.js"
+        "identify-tenant.js",
+        "/lib/xmlToJson/xmlToJson.js",
+        "contentScript.js"
       ],
       "css": [
         "/lib/prettify/prettify.css",

@@ -935,11 +935,19 @@ function waitForElementToDisplay(selector, time) {
 //Collect Infos to Iflow
 function getIflowInfo(callback) {
 
-  makeCallPromise("GET", "/itspaces/Operations/com.sap.it.op.tmn.commands.dashboard.webui.IntegrationComponentsListCommand", false, 'application/json').then((response) => {
-    var resp = JSON.parse(response).artifactInformations;
-    resp = resp.find((element) => {
-      return element.symbolicName == cpiData.integrationFlowId;
-    });
+  makeCallPromise("GET", "/itspaces/Operations/com.sap.it.op.tmn.commands.dashboard.webui.IntegrationComponentsListCommand", false).then((response) => {
+    response = new XmlToJson().parse(response)["com.sap.it.op.tmn.commands.dashboard.webui.IntegrationComponentsListResponse"];
+    var resp = response.artifactInformations;
+
+    if (resp.length) {
+      resp = resp.find((element) => {
+        return element.symbolicName == cpiData.integrationFlowId;
+      });
+    } else {
+      if (resp.symbolicName != cpiData.integrationFlowId) {
+        resp = null;
+      }
+    }
     if (!resp) {
       throw "Integration Flow was not found. Probably it is not deployed.";
     }
