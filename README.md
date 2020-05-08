@@ -148,6 +148,7 @@ Many thanks to ConVista Consulting AG in Cologne, Germany. They supported this i
 
 ### Contributers
 >- [Raffael Herrmann](https://github.com/codebude): Speed up handling of large XML structures in beautifier.
+>- [Ivo Vermeer](https://github.com/IvoVermeer): Change icon, text and tenant color
 
 ## License
 [GNU GPLv3](https://choosealicense.com/licenses/gpl-3.0/)
