@@ -886,38 +886,48 @@ function waitForElementToDisplay(selector, time) {
       }
     }
     if (element) {
+      if (!document.getElementById("__buttonxx")) {
 
-      whatsNewCheck();
+        whatsNewCheck();
 
-      //create Trace Button
-      var tracebutton = createElementFromHTML('<button id="__buttonxx" data-sap-ui="__buttonxx" title="Enable traces" class="sapMBtn sapMBtnBase spcHeaderActionButton" style="display: inline-block; margin-left: 0px;"><span id="__buttonxx-inner" class="sapMBtnHoverable sapMBtnInner sapMBtnText sapMBtnTransparent sapMFocusable"><span class="sapMBtnContent" id="__button12-content"><bdi id="__button12-BDI-content">Trace</bdi></span></span></button>');
-      //Create Toggle Message Bar Button
-      var messagebutton = createElementFromHTML(' <button id="__buttonxy" data-sap-ui="__buttonxy" title="Messages" class="sapMBtn sapMBtnBase spcHeaderActionButton" style="display: inline-block;"><span id="__buttonxy-inner" class="sapMBtnHoverable sapMBtnInner sapMBtnText sapMBtnTransparent sapMFocusable"><span class="sapMBtnContent" id="__button13-content"><bdi id="__button13-BDI-content">Messages</bdi></span></span></button>');
-      var infobutton = createElementFromHTML(' <button id="__buttoninfo" data-sap-ui="__buttoninfo" title="Info" class="sapMBtn sapMBtnBase spcHeaderActionButton" style="display: inline-block;"><span id="__buttonxy-inner" class="sapMBtnHoverable sapMBtnInner sapMBtnText sapMBtnTransparent sapMFocusable"><span class="sapMBtnContent" id="__button13-content"><bdi id="__button13-BDI-content">Info</bdi></span></span></button>');
+        //create Trace Button
+        var tracebutton = createElementFromHTML('<button id="__buttonxx" data-sap-ui="__buttonxx" title="Enable traces" class="sapMBtn sapMBtnBase spcHeaderActionButton" style="display: inline-block; margin-left: 0px;"><span id="__buttonxx-inner" class="sapMBtnHoverable sapMBtnInner sapMBtnText sapMBtnTransparent sapMFocusable"><span class="sapMBtnContent" id="__button12-content"><bdi id="__button12-BDI-content">Trace</bdi></span></span></button>');
+        //Create Toggle Message Bar Button
+        var messagebutton = createElementFromHTML(' <button id="__buttonxy" data-sap-ui="__buttonxy" title="Messages" class="sapMBtn sapMBtnBase spcHeaderActionButton" style="display: inline-block;"><span id="__buttonxy-inner" class="sapMBtnHoverable sapMBtnInner sapMBtnText sapMBtnTransparent sapMFocusable"><span class="sapMBtnContent" id="__button13-content"><bdi id="__button13-BDI-content">Messages</bdi></span></span></button>');
+        var infobutton = createElementFromHTML(' <button id="__buttoninfo" data-sap-ui="__buttoninfo" title="Info" class="sapMBtn sapMBtnBase spcHeaderActionButton" style="display: inline-block;"><span id="__buttonxy-inner" class="sapMBtnHoverable sapMBtnInner sapMBtnText sapMBtnTransparent sapMFocusable"><span class="sapMBtnContent" id="__button13-content"><bdi id="__button13-BDI-content">Info</bdi></span></span></button>');
 
-      //append buttons
-      area = document.querySelector("[id*='--iflowObjectPageHeader-actions']")
-      area.appendChild(createElementFromHTML("<br />"));
-      area.appendChild(tracebutton);
-      area.appendChild(messagebutton);
-      area.appendChild(infobutton);
+        //append buttons
+        area = document.querySelector("[id*='--iflowObjectPageHeader-actions']")
+        area.appendChild(createElementFromHTML("<br />"));
+        area.appendChild(tracebutton);
+        area.appendChild(messagebutton);
+        area.appendChild(infobutton);
 
 
-      tracebutton.addEventListener("click", (btn) => {
-        setLogLevel("TRACE", cpiData.integrationFlowId);
-      })
+        tracebutton.addEventListener("click", (btn) => {
+          setLogLevel("TRACE", cpiData.integrationFlowId);
+        })
 
-      messagebutton.addEventListener("click", (btn) => {
-        if (sidebar.active) {
-          sidebar.deactivate();
-        } else {
-          sidebar.init();
-        }
-      });
+        messagebutton.addEventListener("click", (btn) => {
+          if (sidebar.active) {
+            sidebar.deactivate();
+          } else {
+            sidebar.init();
+          }
+        });
 
-      infobutton.addEventListener("click", (btn) => {
-        getIflowInfo(openIflowInfoPopup);
-      })
+        infobutton.addEventListener("click", (btn) => {
+          getIflowInfo(openIflowInfoPopup);
+        })
+
+      }
+      cpiData.buildTries = cpiData.buildTries + 1;
+      if (cpiData.buildTries < 5) {
+        setTimeout(function () {
+          waitForElementToDisplay(selector, time);
+        }, time);
+      }
+
       return;
     } else {
       setTimeout(function () {
@@ -1524,6 +1534,7 @@ function handleUrlChange() {
     //if iflow found, inject buttons   
     storeVisitedIflowsForPopup();
     //buttons
+    cpiData.buildTries = 0;
     waitForElementToDisplay("[id*='-BDI-content']", 1000);
   } else {
     //deactivate sidebar if not on iflow page
