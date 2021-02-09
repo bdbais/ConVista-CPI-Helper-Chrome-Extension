@@ -136,7 +136,7 @@ async function getLogs() {
   }
 
   //get the messagelogs for current iflow
-  makeCall("GET", "/itspaces/odata/api/v1/MessageProcessingLogs?$filter=IntegrationFlowName eq '" + iflowId + "'&$top=10&$format=json&$orderby=LogStart desc", false, "", (xhr) => {
+  makeCall("GET", "/itspaces/odata/api/v1/MessageProcessingLogs?$filter=IntegrationFlowName eq '" + iflowId + "' and Status ne 'DISCARDED'&$top=10&$format=json&$orderby=LogStart desc", false, "", (xhr) => {
 
     if (xhr.readyState == 4 && sidebar.active) {
 
@@ -198,6 +198,8 @@ async function getLogs() {
               statusColor = "#C70039";
               statusIcon = "";
             }
+
+
             //listItem.style["color"] = statusColor;
 
             let inlineTraceButton = createElementFromHTML("<button class='" + resp[i].MessageGuid + flash + " cpiHelper_inlineInfo-button' style='cursor: pointer;'>" + date.substr(11, 8) + "</button>");
@@ -221,13 +223,13 @@ async function getLogs() {
                 hideInlineTrace();
                 showSnackbar("Inline Debugging Deactivated");
 
+
               } else {
                 hideInlineTrace();
                 var inlineTrace = await showInlineTrace(e.currentTarget.classList[0]);
                 if (inlineTrace) {
                   showSnackbar("Inline Debugging Activated");
                   e.target.classList.add("cpiHelper_inlineInfo-active");
-
                   activeInlineItem = e.target.classList[0];
                 } else {
                   activeInlineItem = null;
@@ -259,10 +261,10 @@ async function getLogs() {
 
             });
 
-          }
-          cpiData.lastMessageHashList = thisMessageHashList;
-        }
 
+            cpiData.lastMessageHashList = thisMessageHashList;
+          }
+        }
       }
       //new update in 3 seconds
       if (sidebar.active) {
@@ -969,7 +971,7 @@ async function openIflowInfoPopup() {
       if (element.endpointInstances && element.endpointInstances.length > 0) {
         var e = document.createElement('div');
         e.classList.add("cpiHelper_infoPopUp_items");
-        e.innerHTML = `<div>${element?.protocol}:</div>`;
+        e.innerHTML = `<div>Endpoints:</div>`;
         x.appendChild(e);
         for (var i = 0; i < element.endpointInstances.length; i++) {
           let f = document.createElement('div');
