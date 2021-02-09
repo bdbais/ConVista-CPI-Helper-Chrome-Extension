@@ -22,6 +22,9 @@ I recommend to read the readme first but if you know what you are doing, you can
 - Last visited iflows in browser-bar-popup
 
 ## Changelog
+### 1.2.3
+- [Feature] Discarded Runs will not be shown in message sidebar
+- [Bugfix] Minor bugfixes
 ### 1.2.2
 - [Bugfix] CPIHelper did not load after tenant update v2
 ### 1.2.1
@@ -153,6 +156,6 @@ Many thanks to ConVista Consulting AG in Cologne, Germany. They supported this i
 ### Contributers
 >- [Raffael Herrmann](https://github.com/codebude): Speed up handling of large XML structures in beautifier.
 >- [Ivo Vermeer](https://github.com/IvoVermeer): Change icon, text and tenant color
-
+>- [bdais](https://github.com/bdbais/): filter discarded entries
 ## License
 [GNU GPLv3](https://choosealicense.com/licenses/gpl-3.0/)

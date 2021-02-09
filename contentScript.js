@@ -1526,6 +1526,7 @@ async function whatsNewCheck() {
     html = `<div id="cpiHelper_WhatsNew">Thank you for using the ConVista CPI Helper. <p>You hace successfully updated to version ${manifestVersion}</p> 
     <h3>Recent Innovations</h3>
     <ul>
+    <li>Version 1.2.3: Minor bugfixes and discarded messages are not shown in sidebar anymore</li>
     <li>Version 1.2.2: If you had issues that CPIHelper improvements wasn't shown in the header bar, this should be fixed now.</li>
     <li>Version 1.2.0: You can now change the tab icon, text and main color of your different CPI tenants. This is very helpful when you have dev and prod tenant or different customers. You can make these settings on the CPI Helper icon (the cloud) in your browser bar (normally on the top right).</li>
     <li>Version 1.1.0: You can now view and delete variables in the Integration Flow Info-PopUp (Press Info in the right top corner)</li>
