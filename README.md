@@ -13,16 +13,29 @@ I recommend to read the readme first but if you know what you are doing, you can
 - Button to switch on trace
 - Directly go to traces of specific message
 - Directly go to logs and attachements of specific message
-- Popup with error-message when hovering message in sidebar
-- Popup with deployment info
+- Pop-up with error-message when hovering message in sidebar
+- Pop-up with deployment info
+- View and delete variables in info pop-up
 
 ### General CPI Improvements
 - Useful links in browser-bar-popup
 - Last visited iflows in browser-bar-popup
 
 ## Changelog
+### 1.2.2
+- [Bugfix] CPIHelper did not load after tenant update v2
+### 1.2.1
+- [Bugfix] CPIHelper did not load after tenant update
+### 1.2.0
+- [Feature] Select tab icon, text and tenant color for your tenants
+- [Bugfix] Improved compatibility with Cloud Foundry
+### 1.1.1
+- [Bugfix] Fixed some css issues
+### 1.1.0
+- [Feature] View and delete variables in info pop-up
+- [Feature] What's new screen when updating
 ### 1.0.3
-- [Improvement] Improved speed beautifier with big xml structures. 
+- [Improvement] Improved speed beautifier with big xml structures
 ### 1.0.2
 - [Bugfix] Fixed icon in Chrome Store
 ### 1.0.1
@@ -130,6 +143,7 @@ See [Contribution guidelines for this project](docs/CONTRIBUTING.md) if you want
 
 ## Todos
 - Change tab name to tenant name to better differentiate between different tenants
+- Inject data from trace in the simulation function
 
 If you have any ideas, please write a message or comment at the [SAP Community](https://blogs.sap.com/2020/03/05/cpi-chrome-plugin-to-enhance-sap-cloud-platform-integration-usability/#)
 
@@ -138,6 +152,7 @@ Many thanks to ConVista Consulting AG in Cologne, Germany. They supported this i
 
 ### Contributers
 >- [Raffael Herrmann](https://github.com/codebude): Speed up handling of large XML structures in beautifier.
+>- [Ivo Vermeer](https://github.com/IvoVermeer): Change icon, text and tenant color
 
 ## License
 [GNU GPLv3](https://choosealicense.com/licenses/gpl-3.0/)
