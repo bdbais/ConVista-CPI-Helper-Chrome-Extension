@@ -198,47 +198,49 @@ async function getLogs() {
               statusColor = "#C70039";
               statusIcon = "";
             }
-            //listItem.style["color"] = statusColor;
+            if (resp[i].Status != "DISCARDED") {
+		  
+		    //listItem.style["color"] = statusColor;
 
-            let inlineTraceButton = createElementFromHTML("<button class='" + resp[i].MessageGuid + flash + " cpiHelper_inlineInfo-button' style='cursor: pointer;'>" + date.substr(11, 8) + "</button>");
-            activeInlineItem == inlineTraceButton.classList[0] && inlineTraceButton.classList.add("cpiHelper_inlineInfo-active");
+		    let inlineTraceButton = createElementFromHTML("<button class='" + resp[i].MessageGuid + flash + " cpiHelper_inlineInfo-button' style='cursor: pointer;'>" + date.substr(11, 8) + "</button>");
+		    activeInlineItem == inlineTraceButton.classList[0] && inlineTraceButton.classList.add("cpiHelper_inlineInfo-active");
 
 
-            let statusicon = createElementFromHTML("<button class='" + resp[i].MessageGuid + " cpiHelper_sidebar_iconbutton'><span data-sap-ui-icon-content='" + statusIcon + "' class='" + resp[i].MessageGuid + " sapUiIcon sapUiIconMirrorInRTL' style='font-family: SAP-icons; font-size: 0.9rem; color:" + statusColor + ";'> </span></button>");
+		    let statusicon = createElementFromHTML("<button class='" + resp[i].MessageGuid + " cpiHelper_sidebar_iconbutton'><span data-sap-ui-icon-content='" + statusIcon + "' class='" + resp[i].MessageGuid + " sapUiIcon sapUiIconMirrorInRTL' style='font-family: SAP-icons; font-size: 0.9rem; color:" + statusColor + ";'> </span></button>");
 
-            statusicon.onmouseover = (e) => {
+		    statusicon.onmouseover = (e) => {
 
-              infoPopupOpen(e.currentTarget.classList[0]);
-              infoPopupSetTimeout(null);
-            };
-            statusicon.onmouseout = (e) => {
-              infoPopupSetTimeout(2000);
-            };
+		      infoPopupOpen(e.currentTarget.classList[0]);
+		      infoPopupSetTimeout(null);
+		    };
+		    statusicon.onmouseout = (e) => {
+		      infoPopupSetTimeout(2000);
+		    };
 
-            inlineTraceButton.onmouseup = async (e) => {
-              if (activeInlineItem == e.target.classList[0]) {
+		    inlineTraceButton.onmouseup = async (e) => {
+		      if (activeInlineItem == e.target.classList[0]) {
 
-                hideInlineTrace();
-                showSnackbar("Inline Debugging Deactivated");
+			hideInlineTrace();
+			showSnackbar("Inline Debugging Deactivated");
 
-              } else {
-                hideInlineTrace();
-                var inlineTrace = await showInlineTrace(e.currentTarget.classList[0]);
-                if (inlineTrace) {
-                  showSnackbar("Inline Debugging Activated");
-                  e.target.classList.add("cpiHelper_inlineInfo-active");
 
+		      } else {
+			hideInlineTrace();
+			var inlineTrace = await showInlineTrace(e.currentTarget.classList[0]);
+			if (inlineTrace) {
+			  showSnackbar("Inline Debugging Activated");
+			  e.target.classList.add("cpiHelper_inlineInfo-active");
                   activeInlineItem = e.target.classList[0];
                 } else {
                   activeInlineItem = null;
                   showSnackbar("Inline debugging not possible. No data found.");
                 }
 
-              }
+		      }
 
 
-              //   e.target.style.backgroundColor = 'red';
-
+		      //   e.target.style.backgroundColor = 'red';
+		    } // DISCARDED
             };
 
             //      listItem.appendChild(statusicon);
