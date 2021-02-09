@@ -271,7 +271,7 @@ async function getLogs() {
         var getLogsTimer = setTimeout(getLogs, 3000);
       }
     }
-  });
+  });//
 }
 
 async function showBigPopup(content, header) {
