@@ -142,7 +142,7 @@ async function getLogs() {
 
 
 
-      let statusColor = "#FFF";
+      let statusColor = "#000";
 
       if (cpiData?.flowData?.artifactInformation?.deployState == "DEPLOYED") {
         statusColor = "#008000";
@@ -355,6 +355,9 @@ async function showBigPopup(content, header) {
 async function clickTrace(e) {
 
   var formatHeadersAndPropertiesToTable = function (inputList) {
+
+    inputList = inputList.sort(function (a, b) { return a.Name.toLowerCase() > b.Name.toLowerCase() ? 1 : -1 });
+
     if (inputList == null || inputList.length == 0) {
       return "<div>No elements found</div>";
     }
@@ -512,6 +515,7 @@ async function clickTrace(e) {
   }
 
   var formatLogContent = function (inputList) {
+    inputList = inputList.sort(function (a, b) { return a.Name.toLowerCase() > b.Name.toLowerCase() ? 1 : -1 });
     result = "<table><tr><th>Name</th><th>Value</th></tr>"
     var even = "";
     inputList.forEach(item => {
