@@ -2,7 +2,7 @@
 This Chrome Plugin extends the SAP Cloud Platform Integration with some useful features.
 
 I recommend to read the readme first but if you know what you are doing, you can add it to your Chrome Browser directly:
-[![Chrome Web Store](https://developer.chrome.com/webstore/images/ChromeWebStore_Badge_v2_206x58.png)](https://chrome.google.com/webstore/detail/convista-sap-cpi-helper/epoggeaemnkacpinjfgccbjakglngkpb)
+[Chrome Web Store](https://chrome.google.com/webstore/detail/convista-sap-cpi-helper/epoggeaemnkacpinjfgccbjakglngkpb)
 
 ## Features
 ### Integration Flow Designer Improvements
@@ -22,6 +22,9 @@ I recommend to read the readme first but if you know what you are doing, you can
 - Last visited iflows in browser-bar-popup
 
 ## Changelog
+### 1.3.0
+- [Feature] Tracebutton will retrigger trace until pressed again
+- [Feature] Deployment state is shown in message sidebar
 ### 1.2.3
 - [Feature] Discarded Runs will not be shown in message sidebar
 - [Bugfix] Minor bugfixes
