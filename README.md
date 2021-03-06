@@ -22,6 +22,9 @@ I recommend to read the readme first but if you know what you are doing, you can
 - Last visited iflows in browser-bar-popup
 
 ## Changelog
+### 1.3.1
+- [Bugfix] Fixed a bug that prevented the plugin to run under Ubuntu and other Linux systems
+- [Bugfix] Minor bugfixes
 ### 1.3.0
 - [Feature] Tracebutton will retrigger trace until pressed again
 - [Feature] Deployment state is shown in message sidebar

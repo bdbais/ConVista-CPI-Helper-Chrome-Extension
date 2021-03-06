@@ -918,10 +918,10 @@ function buildButtonBar() {
     whatsNewCheck();
     //create Trace Button
     var powertraceText = ""
-    if (powertrace != null) {
-      powertraceText = "cpiHelper_powertrace"
+//    if (powertrace != null) {
+//      powertraceText = "cpiHelper_powertrace"
 
-    }
+//    }
 
 
     var tracebutton = createElementFromHTML(`<button id="__buttonxx" data-sap-ui="__buttonxx" title="Enable traces" class="sapMBtn sapMBtnBase spcHeaderActionButton" style="display: inline-block; margin-left: 0px; float: right;"><span id="__buttonxx-inner" class="sapMBtnHoverable sapMBtnInner sapMBtnText sapMBtnTransparent sapMFocusable"><span class="sapMBtnContent" id="__button134345-content"><bdi id="button134345-BDI-content" class="${powertraceText}">Trace</bdi></span></span></button>`);
@@ -943,7 +943,7 @@ function buildButtonBar() {
 
         powertrace = setInterval(function () {
           btn = document.getElementById("button134345-BDI-content")
-          if (btn.classList.contains("cpiHelper_powertrace")) {
+          if (btn && btn.classList.contains("cpiHelper_powertrace")) {
             setLogLevel("TRACE", cpiData.integrationFlowId);
           } else {
             clearInterval(powertrace)
