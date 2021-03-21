@@ -3,7 +3,7 @@
   let host = window.location.host // global variable to hold host name
   let documentTitleIntervalId; // used by the interval to set document title
   let observerIntervalId; // used to attach a MutationObserver callback
-  let hostData = {
+  var hostData = {
     title: 'Cloud Integration',
     color: '#354a5f',
     icon: 'default'
@@ -20,14 +20,14 @@
   ////////////////////////
   /////// FUNCTIONS //////
   ////////////////////////
-  
+
   // Handles changes made to the storage, even if on a different tab.
-  function monitorSyncStore () {
+  function monitorSyncStore() {
     chrome.storage.onChanged.addListener((changes, namespace) => {
       for (var key in changes) {
         if (key === host) {
           let storageChange = changes[key].newValue // Get the new values
-          
+
           // update the global object
           hostData.title = storageChange.title
           hostData.color = storageChange.color
@@ -71,7 +71,7 @@
   ////////////////////////
 
   // Handle DOM mutations
-  function mutationCallback (mutations) {
+  function mutationCallback(mutations) {
     // Set the header background       
     for (let mutation of mutations) {
       if (mutation.type === 'childList') {
@@ -87,7 +87,7 @@
   }
 
   // Initiate the MutationObserver when div#shellcontent is available
-  function attachObserver (observer) {
+  function attachObserver(observer) {
     let shellContent = document.querySelector('#shellcontent')
     if (shellContent) {
       clearInterval(observerIntervalId);
@@ -123,7 +123,7 @@
   }
 
   // interval is used to overwrite SAPUI5 behaviour
-  function setData({title, color, icon}) {
+  function setData({ title, color, icon }) {
     clearInterval(documentTitleIntervalId)
     // Update element now
     setDocumentTitle(title);
@@ -147,8 +147,17 @@
   }
 
   function setDocumentTitle(title) {
-    if (document.title !== title) {
-      document.title = title;
+    let text = title
+
+    if (cpiData.integrationFlowId) {
+      text = text.replaceAll("$iflow.name", cpiData.integrationFlowId)
+      console.log(text)
+    } else {
+      text = text.replaceAll("$iflow.name", "")
+    }
+
+    if (document.title !== text) {
+      document.title = text;
       console.log('Updating document title')
     }
   }

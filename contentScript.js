@@ -912,16 +912,17 @@ function createElementFromHTML(htmlString) {
   return div.firstChild;
 }
 
+var powertraceflow = null
 var powertrace = null;
 function buildButtonBar() {
   if (!document.getElementById("__buttonxx")) {
     whatsNewCheck();
     //create Trace Button
     var powertraceText = ""
-//    if (powertrace != null) {
-//      powertraceText = "cpiHelper_powertrace"
+    if (powertrace != null && powertraceflow == cpiData.integrationFlowId) {
+      powertraceText = "cpiHelper_powertrace"
 
-//    }
+    }
 
 
     var tracebutton = createElementFromHTML(`<button id="__buttonxx" data-sap-ui="__buttonxx" title="Enable traces" class="sapMBtn sapMBtnBase spcHeaderActionButton" style="display: inline-block; margin-left: 0px; float: right;"><span id="__buttonxx-inner" class="sapMBtnHoverable sapMBtnInner sapMBtnText sapMBtnTransparent sapMFocusable"><span class="sapMBtnContent" id="__button134345-content"><bdi id="button134345-BDI-content" class="${powertraceText}">Trace</bdi></span></span></button>`);
@@ -940,12 +941,13 @@ function buildButtonBar() {
       btn.classList.toggle("cpiHelper_powertrace")
       if (btn.classList.contains("cpiHelper_powertrace")) {
         setLogLevel("TRACE", cpiData.integrationFlowId);
-
+        powertraceflow = cpiData.integrationFlowId;
         powertrace = setInterval(function () {
           btn = document.getElementById("button134345-BDI-content")
-          if (btn && btn.classList.contains("cpiHelper_powertrace")) {
+          if (btn && btn.classList.contains("cpiHelper_powertrace") || cpiData.integrationFlowId == powertraceflow) {
             setLogLevel("TRACE", cpiData.integrationFlowId);
           } else {
+            powertraceflow = null;
             clearInterval(powertrace)
 
             powertrace = null;
@@ -1492,6 +1494,7 @@ function getIflowName() {
     console.log("Found iFlow:" + result);
 
   } catch (e) {
+    cpiData.integrationFlowId = null;
     console.log(e);
     console.log("no integrationflow found");
   }
@@ -1562,8 +1565,10 @@ function handleUrlChange() {
   if (getIflowName()) {
     //if iflow found, inject buttons   
     storeVisitedIflowsForPopup();
+    setDocumentTitle(hostData.title)
 
   } else {
+    setDocumentTitle(hostData.title)
     //deactivate sidebar if not on iflow page
     if (sidebar.active) {
       sidebar.deactivate();
@@ -1589,6 +1594,7 @@ async function whatsNewCheck() {
     html = `<div id="cpiHelper_WhatsNew">Thank you for using the CPI Helper. <p>You hace successfully updated to version ${manifestVersion}</p> 
     <h3>Recent Innovations</h3>
     <ul>
+    <li>Version 1.4.0: Show Integration Flow name in title</li>
     <li>Version 1.3.0: Tracebutton will retrigger trace after pressed again</li>
     <li>Version 1.2.3: Minor bugfixes and discarded messages are not shown in sidebar anymore</li>
     <li>Version 1.2.2: If you had issues that CPIHelper improvements wasn't shown in the header bar, this should be fixed now.</li>

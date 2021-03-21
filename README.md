@@ -22,6 +22,9 @@ I recommend to read the readme first but if you know what you are doing, you can
 - Last visited iflows in browser-bar-popup
 
 ## Changelog
+### 1.4.0
+- [Bugfix] Now you can show the current integration flow in tab name with $iflow.name in custom name for tab
+- [Bugfix] Minor bugfixes with powertrace
 ### 1.3.1
 - [Bugfix] Fixed a bug that prevented the plugin to run under Ubuntu and other Linux systems
 - [Bugfix] Minor bugfixes
