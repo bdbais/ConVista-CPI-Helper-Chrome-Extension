@@ -36,9 +36,11 @@ function addTenantUrls() {
         <div>
             <label for="tenanName">Set custom name for tab:</label><br>
             <input type="text" name="tenantName" id="tenantName" class="input_fields"/>
+            <div style="margin-bottom: 0.6em;">use $iflow.name to show current iflow name.</div>
         </div>
+       
         <div>
-            <label for="color">Select tenant color</label><br>
+            <label for="color">Select tenant color:</label><br>
             <input type="color" name="color"  class="input_fields" id="colorSelect"/>
         </div>
         <div>

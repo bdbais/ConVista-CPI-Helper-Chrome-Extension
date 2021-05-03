@@ -348,6 +348,10 @@ padding: 20px;
 display: none;
 }
 
+.cpiHelper_powertrace {
+  color: red !important
+}
+
 .cpiHelper_traceText.cpiHelper_traceText_active {
 display:block;
 }

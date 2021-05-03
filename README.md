@@ -2,7 +2,7 @@
 This Chrome Plugin extends the SAP Cloud Platform Integration with some useful features.
 
 I recommend to read the readme first but if you know what you are doing, you can add it to your Chrome Browser directly:
-[![Chrome Web Store](https://developer.chrome.com/webstore/images/ChromeWebStore_Badge_v2_206x58.png)](https://chrome.google.com/webstore/detail/convista-sap-cpi-helper/epoggeaemnkacpinjfgccbjakglngkpb)
+[Chrome Web Store](https://chrome.google.com/webstore/detail/convista-sap-cpi-helper/epoggeaemnkacpinjfgccbjakglngkpb)
 
 ## Features
 ### Integration Flow Designer Improvements
@@ -22,6 +22,18 @@ I recommend to read the readme first but if you know what you are doing, you can
 - Last visited iflows in browser-bar-popup
 
 ## Changelog
+### 1.4.0
+- [Bugfix] Now you can show the current integration flow in tab name with $iflow.name in custom name for tab
+- [Bugfix] Minor bugfixes with powertrace
+### 1.3.1
+- [Bugfix] Fixed a bug that prevented the plugin to run under Ubuntu and other Linux systems
+- [Bugfix] Minor bugfixes
+### 1.3.0
+- [Feature] Tracebutton will retrigger trace until pressed again
+- [Feature] Deployment state is shown in message sidebar
+### 1.2.3
+- [Feature] Discarded Runs will not be shown in message sidebar
+- [Bugfix] Minor bugfixes
 ### 1.2.2
 - [Bugfix] CPIHelper did not load after tenant update v2
 ### 1.2.1
@@ -153,6 +165,6 @@ Many thanks to ConVista Consulting AG in Cologne, Germany. They supported this i
 ### Contributers
 >- [Raffael Herrmann](https://github.com/codebude): Speed up handling of large XML structures in beautifier.
 >- [Ivo Vermeer](https://github.com/IvoVermeer): Change icon, text and tenant color
-
+>- [bdais](https://github.com/bdbais/): filter discarded entries
 ## License
 [GNU GPLv3](https://choosealicense.com/licenses/gpl-3.0/)

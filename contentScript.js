@@ -135,8 +135,39 @@ async function getLogs() {
     return;
   }
 
+
+  getIflowInfo((data) => {
+    let deploymentText = document.getElementById('deploymentText');
+    if (deploymentText) {
+
+
+
+      let statusColor = "#000";
+
+      if (cpiData?.flowData?.artifactInformation?.deployState == "DEPLOYED") {
+        statusColor = "#008000";
+      }
+
+      if (cpiData?.flowData?.artifactInformation?.deployState == "STARTING") {
+        statusColor = "#FFC300";
+      }
+
+      if (cpiData?.flowData?.artifactInformation?.deployState == "STORED") {
+        statusColor = "#FFC300";
+      }
+
+      if (cpiData?.flowData?.artifactInformation?.deployState == "FAILED") {
+        statusColor = "#FF0000";
+
+      }
+
+      deploymentText.innerHTML = "State: <span style='color: " + statusColor + "'>" + cpiData?.flowData?.artifactInformation?.deployState + "</span>";
+    }
+  }, true)
+
+
   //get the messagelogs for current iflow
-  makeCall("GET", "/itspaces/odata/api/v1/MessageProcessingLogs?$filter=IntegrationFlowName eq '" + iflowId + "'&$top=10&$format=json&$orderby=LogStart desc", false, "", (xhr) => {
+  makeCall("GET", "/itspaces/odata/api/v1/MessageProcessingLogs?$filter=IntegrationFlowName eq '" + iflowId + "' and Status ne 'DISCARDED'&$top=10&$format=json&$orderby=LogStart desc", false, "", (xhr) => {
 
     if (xhr.readyState == 4 && sidebar.active) {
 
@@ -147,7 +178,7 @@ async function getLogs() {
 
       let updatedText = document.getElementById('updatedText');
 
-      updatedText.innerHTML = "<span>Last update:<br>" + new Date().toLocaleString("de-DE") + "</span>";
+      updatedText.innerHTML = "<span>Last update: " + new Date().toLocaleTimeString("de-DE") + "</span>";
 
       let thisMessageHash = "";
       if (resp.length != 0) {
@@ -198,49 +229,49 @@ async function getLogs() {
               statusColor = "#C70039";
               statusIcon = "";
             }
-            if (resp[i].Status != "DISCARDED") {
-		  
-		    //listItem.style["color"] = statusColor;
-
-		    let inlineTraceButton = createElementFromHTML("<button class='" + resp[i].MessageGuid + flash + " cpiHelper_inlineInfo-button' style='cursor: pointer;'>" + date.substr(11, 8) + "</button>");
-		    activeInlineItem == inlineTraceButton.classList[0] && inlineTraceButton.classList.add("cpiHelper_inlineInfo-active");
 
 
-		    let statusicon = createElementFromHTML("<button class='" + resp[i].MessageGuid + " cpiHelper_sidebar_iconbutton'><span data-sap-ui-icon-content='" + statusIcon + "' class='" + resp[i].MessageGuid + " sapUiIcon sapUiIconMirrorInRTL' style='font-family: SAP-icons; font-size: 0.9rem; color:" + statusColor + ";'> </span></button>");
+            //listItem.style["color"] = statusColor;
 
-		    statusicon.onmouseover = (e) => {
-
-		      infoPopupOpen(e.currentTarget.classList[0]);
-		      infoPopupSetTimeout(null);
-		    };
-		    statusicon.onmouseout = (e) => {
-		      infoPopupSetTimeout(2000);
-		    };
-
-		    inlineTraceButton.onmouseup = async (e) => {
-		      if (activeInlineItem == e.target.classList[0]) {
-
-			hideInlineTrace();
-			showSnackbar("Inline Debugging Deactivated");
+            let inlineTraceButton = createElementFromHTML("<button class='" + resp[i].MessageGuid + flash + " cpiHelper_inlineInfo-button' style='cursor: pointer;'>" + date.substr(11, 8) + "</button>");
+            activeInlineItem == inlineTraceButton.classList[0] && inlineTraceButton.classList.add("cpiHelper_inlineInfo-active");
 
 
-		      } else {
-			hideInlineTrace();
-			var inlineTrace = await showInlineTrace(e.currentTarget.classList[0]);
-			if (inlineTrace) {
-			  showSnackbar("Inline Debugging Activated");
-			  e.target.classList.add("cpiHelper_inlineInfo-active");
+            let statusicon = createElementFromHTML("<button class='" + resp[i].MessageGuid + " cpiHelper_sidebar_iconbutton'><span data-sap-ui-icon-content='" + statusIcon + "' class='" + resp[i].MessageGuid + " sapUiIcon sapUiIconMirrorInRTL' style='font-family: SAP-icons; font-size: 0.9rem; color:" + statusColor + ";'> </span></button>");
+
+            statusicon.onmouseover = (e) => {
+
+              infoPopupOpen(e.currentTarget.classList[0]);
+              infoPopupSetTimeout(null);
+            };
+            statusicon.onmouseout = (e) => {
+              infoPopupSetTimeout(2000);
+            };
+
+            inlineTraceButton.onmouseup = async (e) => {
+              if (activeInlineItem == e.target.classList[0]) {
+
+                hideInlineTrace();
+                showSnackbar("Inline Debugging Deactivated");
+
+
+              } else {
+                hideInlineTrace();
+                var inlineTrace = await showInlineTrace(e.currentTarget.classList[0]);
+                if (inlineTrace) {
+                  showSnackbar("Inline Debugging Activated");
+                  e.target.classList.add("cpiHelper_inlineInfo-active");
                   activeInlineItem = e.target.classList[0];
                 } else {
                   activeInlineItem = null;
                   showSnackbar("Inline debugging not possible. No data found.");
                 }
 
-		      }
+              }
 
 
-		      //   e.target.style.backgroundColor = 'red';
-		    } // DISCARDED
+              //   e.target.style.backgroundColor = 'red';
+
             };
 
             //      listItem.appendChild(statusicon);
@@ -261,17 +292,17 @@ async function getLogs() {
 
             });
 
-          }
-          cpiData.lastMessageHashList = thisMessageHashList;
-        }
 
+            cpiData.lastMessageHashList = thisMessageHashList;
+          }
+        }
       }
       //new update in 3 seconds
       if (sidebar.active) {
         var getLogsTimer = setTimeout(getLogs, 3000);
       }
     }
-  });
+  });//
 }
 
 async function showBigPopup(content, header) {
@@ -324,6 +355,9 @@ async function showBigPopup(content, header) {
 async function clickTrace(e) {
 
   var formatHeadersAndPropertiesToTable = function (inputList) {
+
+    inputList = inputList.sort(function (a, b) { return a.Name.toLowerCase() > b.Name.toLowerCase() ? 1 : -1 });
+
     if (inputList == null || inputList.length == 0) {
       return "<div>No elements found</div>";
     }
@@ -481,6 +515,7 @@ async function clickTrace(e) {
   }
 
   var formatLogContent = function (inputList) {
+    inputList = inputList.sort(function (a, b) { return a.Name.toLowerCase() > b.Name.toLowerCase() ? 1 : -1 });
     result = "<table><tr><th>Name</th><th>Value</th></tr>"
     var even = "";
     inputList.forEach(item => {
@@ -728,7 +763,7 @@ async function createInlineTraceElements(MessageGuid) {
   return new Promise(async (resolve, reject) => {
     inlineTraceElements = [];
 
-    var logRuns = await getMessageProcessingLogRuns(MessageGuid);
+    var logRuns = await getMessageProcessingLogRuns(MessageGuid, false);
 
     if (logRuns == null || logRuns.length == 0) {
       return resolve(0);
@@ -877,22 +912,51 @@ function createElementFromHTML(htmlString) {
   return div.firstChild;
 }
 
+var powertraceflow = null
+var powertrace = null;
 function buildButtonBar() {
   if (!document.getElementById("__buttonxx")) {
     whatsNewCheck();
     //create Trace Button
-    var tracebutton = createElementFromHTML('<button id="__buttonxx" data-sap-ui="__buttonxx" title="Enable traces" class="sapMBtn sapMBtnBase spcHeaderActionButton" style="display: inline-block; margin-left: 0px;"><span id="__buttonxx-inner" class="sapMBtnHoverable sapMBtnInner sapMBtnText sapMBtnTransparent sapMFocusable"><span class="sapMBtnContent" id="__button12-content"><bdi id="__button12-BDI-content">Trace</bdi></span></span></button>');
+    var powertraceText = ""
+    if (powertrace != null && powertraceflow == cpiData.integrationFlowId) {
+      powertraceText = "cpiHelper_powertrace"
+
+    }
+
+
+    var tracebutton = createElementFromHTML(`<button id="__buttonxx" data-sap-ui="__buttonxx" title="Enable traces" class="sapMBtn sapMBtnBase spcHeaderActionButton" style="display: inline-block; margin-left: 0px; float: right;"><span id="__buttonxx-inner" class="sapMBtnHoverable sapMBtnInner sapMBtnText sapMBtnTransparent sapMFocusable"><span class="sapMBtnContent" id="__button134345-content"><bdi id="button134345-BDI-content" class="${powertraceText}">Trace</bdi></span></span></button>`);
+
     //Create Toggle Message Bar Button
-    var messagebutton = createElementFromHTML(' <button id="__buttonxy" data-sap-ui="__buttonxy" title="Messages" class="sapMBtn sapMBtnBase spcHeaderActionButton" style="display: inline-block;"><span id="__buttonxy-inner" class="sapMBtnHoverable sapMBtnInner sapMBtnText sapMBtnTransparent sapMFocusable"><span class="sapMBtnContent" id="__button13-content"><bdi id="__button13-BDI-content">Messages</bdi></span></span></button>');
-    var infobutton = createElementFromHTML(' <button id="__buttoninfo" data-sap-ui="__buttoninfo" title="Info" class="sapMBtn sapMBtnBase spcHeaderActionButton" style="display: inline-block;"><span id="__buttonxy-inner" class="sapMBtnHoverable sapMBtnInner sapMBtnText sapMBtnTransparent sapMFocusable"><span class="sapMBtnContent" id="__button13-content"><bdi id="__button13-BDI-content">Info</bdi></span></span></button>');
+    var messagebutton = createElementFromHTML(' <button id="__buttonxy" data-sap-ui="__buttonxy" title="Messages" class="sapMBtn sapMBtnBase spcHeaderActionButton" style="display: inline-block; float: right;"><span id="__buttonxy-inner" class="sapMBtnHoverable sapMBtnInner sapMBtnText sapMBtnTransparent sapMFocusable"><span class="sapMBtnContent" id="__button13-content"><bdi id="__button18778-BDI-content">Messages</bdi></span></span></button>');
+    var infobutton = createElementFromHTML(' <button id="__buttoninfo" data-sap-ui="__buttoninfo" title="Info" class="sapMBtn sapMBtnBase spcHeaderActionButton" style="display: inline-block; float: right;"><span id="__buttonxy-inner" class="sapMBtnHoverable sapMBtnInner sapMBtnText sapMBtnTransparent sapMFocusable"><span class="sapMBtnContent" id="__button13-content"><bdi id="__button134343-BDI-content">Info</bdi></span></span></button>');
     //append buttons
     area = document.querySelector("[id*='--iflowObjectPageHeader-actions']");
     area.appendChild(createElementFromHTML("<br />"));
-    area.appendChild(tracebutton);
-    area.appendChild(messagebutton);
     area.appendChild(infobutton);
-    tracebutton.addEventListener("click", (btn) => {
-      setLogLevel("TRACE", cpiData.integrationFlowId);
+    area.appendChild(messagebutton);
+    area.appendChild(tracebutton);
+    tracebutton.addEventListener("click", () => {
+      btn = document.getElementById("button134345-BDI-content")
+      btn.classList.toggle("cpiHelper_powertrace")
+      if (btn.classList.contains("cpiHelper_powertrace")) {
+        setLogLevel("TRACE", cpiData.integrationFlowId);
+        powertraceflow = cpiData.integrationFlowId;
+        powertrace = setInterval(function () {
+          btn = document.getElementById("button134345-BDI-content")
+          if (btn && btn.classList.contains("cpiHelper_powertrace") || cpiData.integrationFlowId == powertraceflow) {
+            setLogLevel("TRACE", cpiData.integrationFlowId);
+          } else {
+            powertraceflow = null;
+            clearInterval(powertrace)
+
+            powertrace = null;
+          }
+        }, 60 * 1000 * 5)
+      } else {
+        showSnackbar("Trace will not be retriggered anymore.");
+      }
+
     });
     messagebutton.addEventListener("click", (btn) => {
       if (sidebar.active) {
@@ -909,9 +973,9 @@ function buildButtonBar() {
 }
 
 //Collect Infos to Iflow
-function getIflowInfo(callback) {
+async function getIflowInfo(callback, silent = false) {
 
-  makeCallPromise("GET", "/itspaces/Operations/com.sap.it.op.tmn.commands.dashboard.webui.IntegrationComponentsListCommand", false).then((response) => {
+  return makeCallPromise("GET", "/itspaces/Operations/com.sap.it.op.tmn.commands.dashboard.webui.IntegrationComponentsListCommand", false).then((response) => {
     response = new XmlToJson().parse(response)["com.sap.it.op.tmn.commands.dashboard.webui.IntegrationComponentsListResponse"];
     var resp = response.artifactInformations;
 
@@ -935,7 +999,9 @@ function getIflowInfo(callback) {
     callback();
     return;
   }).catch((error) => {
-    showSnackbar(JSON.stringify(error));
+    if (!silent) {
+      showSnackbar(JSON.stringify(error));
+    }
   });
 }
 
@@ -971,7 +1037,7 @@ async function openIflowInfoPopup() {
       if (element.endpointInstances && element.endpointInstances.length > 0) {
         var e = document.createElement('div');
         e.classList.add("cpiHelper_infoPopUp_items");
-        e.innerHTML = `<div>${element?.protocol}:</div>`;
+        e.innerHTML = `<div>Endpoints:</div>`;
         x.appendChild(e);
         for (var i = 0; i < element.endpointInstances.length; i++) {
           let f = document.createElement('div');
@@ -1261,7 +1327,7 @@ var sidebar = {
     <div id="cpiHelper_contentheader">ConVista CPI Helper<span id='sidebar_modal_close' class='cpiHelper_closeButton'>X</span></div> 
     <div id="outerFrame">
     <div id="updatedText" class="contentText"></div>
-    
+    <div id="deploymentText" class="contentText">State: </div>
     <div><table id="messageList" class="contentText"></table></div>
     
     
@@ -1330,7 +1396,7 @@ async function infoPopupOpen(MessageGuid) {
   x.className = "show";
 
   ///MessageProcessingLogRuns('AF5eUbNwAc1SeL_vdh09y4njOvwO')/RunSteps?$inlinecount=allpages&$format=json&$top=500
-  var resp = await getMessageProcessingLogRuns(MessageGuid)
+  var resp = await getMessageProcessingLogRuns(MessageGuid, false)
 
   var y = document.getElementById("cpiHelper_sidebar_popup");
   y.innerText = "";
@@ -1383,13 +1449,12 @@ function createErrorMessageElement(message) {
   return errorContainer;
 }
 
-async function getMessageProcessingLogRuns(MessageGuid) {
-  return makeCallPromise("GET", "/itspaces/odata/api/v1/MessageProcessingLogs('" + MessageGuid + "')/Runs?$inlinecount=allpages&$format=json&$top=500", true).then((responseText) => {
+async function getMessageProcessingLogRuns(MessageGuid, store = true) {
+  return makeCallPromise("GET", "/itspaces/odata/api/v1/MessageProcessingLogs('" + MessageGuid + "')/Runs?$inlinecount=allpages&$format=json&$top=500", store).then((responseText) => {
     var resp = JSON.parse(responseText);
-    console.log(resp);
     return resp.d.results[0].Id;
   }).then((runId) => {
-    return makeCallPromise("GET", "/itspaces/odata/api/v1/MessageProcessingLogRuns('" + runId + "')/RunSteps?$inlinecount=allpages&$format=json&$top=500", true);
+    return makeCallPromise("GET", "/itspaces/odata/api/v1/MessageProcessingLogRuns('" + runId + "')/RunSteps?$inlinecount=allpages&$format=json&$top=500", store);
   }).then((response) => {
     return JSON.parse(response).d.results;
   }).catch((e) => {
@@ -1429,6 +1494,7 @@ function getIflowName() {
     console.log("Found iFlow:" + result);
 
   } catch (e) {
+    cpiData.integrationFlowId = null;
     console.log(e);
     console.log("no integrationflow found");
   }
@@ -1499,8 +1565,10 @@ function handleUrlChange() {
   if (getIflowName()) {
     //if iflow found, inject buttons   
     storeVisitedIflowsForPopup();
+    setDocumentTitle(hostData.title)
 
   } else {
+    setDocumentTitle(hostData.title)
     //deactivate sidebar if not on iflow page
     if (sidebar.active) {
       sidebar.deactivate();
@@ -1523,16 +1591,19 @@ async function whatsNewCheck() {
   check = await storageGetPromise("whatsNewV" + manifestVersion);
 
   if (!check) {
-    html = `<div id="cpiHelper_WhatsNew">Thank you for using the ConVista CPI Helper. <p>You hace successfully updated to version ${manifestVersion}</p> 
+    html = `<div id="cpiHelper_WhatsNew">Thank you for using the CPI Helper. <p>You hace successfully updated to version ${manifestVersion}</p> 
     <h3>Recent Innovations</h3>
     <ul>
+    <li>Version 1.4.0: Show Integration Flow name in title</li>
+    <li>Version 1.3.0: Tracebutton will retrigger trace after pressed again</li>
+    <li>Version 1.2.3: Minor bugfixes and discarded messages are not shown in sidebar anymore</li>
     <li>Version 1.2.2: If you had issues that CPIHelper improvements wasn't shown in the header bar, this should be fixed now.</li>
     <li>Version 1.2.0: You can now change the tab icon, text and main color of your different CPI tenants. This is very helpful when you have dev and prod tenant or different customers. You can make these settings on the CPI Helper icon (the cloud) in your browser bar (normally on the top right).</li>
     <li>Version 1.1.0: You can now view and delete variables in the Integration Flow Info-PopUp (Press Info in the right top corner)</li>
     <li>Version 1.0.0: Activate InlineTrace to debug your Integration Flows directly in the Designer (<a href="https://blogs.sap.com/2020/03/31/cpi-the-next-evolution-see-traces-directly-in-the-integration-flow-designer-of-sap-cloud-platform-integration/" target="_blank">more</a>)</li> 
   </ul>
      <p>If you like our work you can tell your coworkers about this plug-in. To stay informed about updates, you can follow <a href="https://people.sap.com/dbeckbauer"  target="_blank">me</a> or leave a like or message in the <a href="https://blogs.sap.com/2020/03/31/cpi-the-next-evolution-see-traces-directly-in-the-integration-flow-designer-of-sap-cloud-platform-integration/"  target="_blank">SAP Community</a>.</p>
-     <p>The CPI Helper is free and Open Source. If you want to contribute or you have found any bugs than have a look at our <a href="https://github.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension" target="_blank">GitHub Page</a>.</p>
+     <p>The CPI Helper is free and Open Source. If you want to contribute or you have found any bugs than have a look at our <a href="https://github.com/dbeck121/ConVista-CPI-Helper-Chrome-Extension" target="_blank">GitHub Page</a>. You can also find me on <a href="https://www.linkedin.com/in/dominic-beckbauer-515894188/">LinkedIn</a></p>
  
   </div>
   `;
